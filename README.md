@@ -164,8 +164,6 @@
 
 ## JPA?
 
----
-
 - Java Persistence API
 - 자바 진영의 ORM 기술 표준
 
@@ -340,3 +338,499 @@
 ![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2a4d2c86-ec16-4ede-9071-9aea0145093d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151201Z&X-Amz-Expires=86400&X-Amz-Signature=1b3fb07c2567529dc6b00415ee662311ba157af3bae58c3aa0d0e3bf0e46270f&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 - Member 객체를 사용하면서 Team 객체를 자주 사용안하면 지연 로딩으로 설정을 해줄 수 있게 제공하여 최적화를 가능하게 해준다.
+
+# JPA 시작
+
+- Hello JPA - 프로젝트 생성
+- Hello JPA - 애플리케이션 개발
+
+## Hello JPA - 프로젝트 생성
+
+- java 8 이상 (8 권장)
+  - 11 사용
+- 메이블 설정
+  - groupId : jpa-basic
+  - artifactId : ex1-hello-jpa
+  - version : 1.0.0
+
+*Maven Project 생성*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5de5875a-a12e-459c-9953-d514437457dc/Untitled.png)
+
+**라이브러리 추가 - pom.xml**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>jpa-basic</groupId>
+    <artifactId>ex1-hello-jpa</artifactId>
+    <version>1.0.0</version>
+    <dependencies>
+        <!-- JPA 하이버네이트 -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>5.6.14.Final</version>
+        </dependency>
+        <!-- H2 데이터베이스 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.1.214</version>
+        </dependency>
+    </dependencies>
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+</project>
+```
+
+- Hibernate를 사용하기 위해 `hibernate-entitymanager` dependency를 추가해준다.
+  - 다른거 다 필요없이 해당 dependency만 추가하면 사용가능
+- DBMS는 h2를 사용 설치한 h2버전을 맞춰서 사용해야함.
+
+**JPA 설정하기 - persistence.xml**
+
+---
+
+- JPA 설정 파일
+- /META-INF/persistence.xml 위치
+- persistence-unit name으로 이름 지정
+- javax.persistence로 시작: JPA 표준 속성
+- hibernate로 시작: 하이버네이트 전용 속성
+
+*persistence.xml*
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 필수 속성 -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+
+            <!-- 옵션 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+            <!--<property name="hibernate.hbm2ddl.auto" value="create" />-->
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+- `persistence version="2.2"`는 JPA의 2.2 버전을 사용한다는 의미이다.
+- `hibernate.dialect`속성은 value값에 특정 DBMS의 Dialect으로 값을 세팅해주면 해당 DB의 SQL을 생성해준다.
+  - H2 : org.hibernate.dialect.H2Dialect
+  - Oracle 10g : org.hibernate.dialect.Oracle10gDialect
+  - MySQL : org.hibernate.dialect.MySQL5InnoDBDialect
+- 하이버네이트는 40가지 이상의 데이터베이스 방언을 지원해준다.
+
+**데이터베이스 방언**
+
+---
+
+- JPA는 특정 데이터베이스에 종속되지 않는다.
+- 각각의 데이터베이스가 제공하는  SQL 문법과 함수는 조금씩 다름
+  - 가변 문자 : MySQL은 VARCHAR, Oracle은 VARCHAR2
+  - 문자열을 자르는 함수 : SQL 표준은 SUBSTRING(), Oracle은 SUBSTR()
+- 페이징 : MySQL은 LIMIT, Oracle은 ROWNUM
+- 방언 : SQL 표준을 지키지 않는 특정 데이터베이스만 고유한 기능
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/937ed801-8c67-46a8-b36b-d295807f5b08/Untitled.png)
+
+## Hello JPA - 애플리케이션 개발
+
+**JPA 구동 방식**
+
+---
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c690d6a7-f92f-4420-a07c-e7b0f11d6660/Untitled.png)
+
+1. 먼저 Persistence가 persistence.xml에 설정 정보를 읽는다.
+2. Persistence.xml을 읽어서 EntityManagerFactory를 만든다.
+3. EntityManagerFactory라는 공장을 통해서 필요한 EntityManager를 생성해준다.
+
+### **실습 - JPA 동작 확인**
+
+- JpaMain 클래스 생성
+- JPA 동작 확인
+
+**객체와 테이블을 생성하고 매핑하기**
+
+---
+
+- `@Entity`: JPA가 관리할 객체
+- `@Id`: 데이터베이스 PK와 매핑
+
+```java
+package hellojpa;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Member {
+
+    @Id
+    private Long id;
+    private String name;
+
+    //Getter, Setter...
+}
+```
+
+```sql
+create table Member (
+	 id bigint not null,
+	 name varchar(255),
+	 primary key (id)
+);
+```
+
+### **실습 - 회원 저장**
+
+**회원 등록**
+
+*JpaMain 클래스 생성*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+        
+        try {
+            Member member = new Member();
+            member.setId(1L);
+            member.setName("HelloA");
+
+            em.persist(member);
+            
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+        
+        emf.close();
+    }
+}
+```
+
+- `EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");`
+  - JPA는 항상 `EntityManagerFactory`라는 걸 만들어줘야 한다.
+  - `Persistence.createEntityManagerFactory("hello");`는 `persistence.xml`파일의 `persistence-unit name="hello">` 설정 정보를 불러와서 `EntityManagerFactory`를 만들어준다.
+- JPA는 트랜잭션이 꼭 실행되어야만 작동하기 때문에 `tx.begin();`이렇게 꼭 트랜잭션을 시작해주고 JPA를 호출해야한다.
+
+*실행*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/dffbe2ca-5226-4b2d-9ce9-38e5c1469aaa/Untitled.png)
+
+- 실행을 해보면 이렇게 실행된 쿼리가 로그에 찍힌다.
+- 실행된 쿼리가 로그에 표시된 이유는 `persistence.xml`에서 hibernate속성들을 설정해줬기 때문이다.
+  - `<property name="hibernate.show_sql" value="true"/>`
+    - 실행 쿼리를 로그로 출력해줌
+  - `<property name="hibernate.format_sql" value="true"/>`
+    - 쿼리를 보기 편하게 개행이나 들여쓰기를 해줌
+  - `<property name="hibernate.use_sql_comments" value="true"/>`
+    - 쿼리 앞에 주석으로 쿼리가 왜 출력됐는지 코멘트를 남겨줌
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8ac3172f-f159-4e72-b727-de62a3e4b31f/Untitled.png)
+
+- h2 콘솔에서 조회 쿼리를 실행해보면 데이터가 조회되는게 확인됨.
+
+> Member 객체를 보면 테이블 명을 지정해주지 않아도 알아서 MEMBER 테이블에 데이터가 적재되는데, 테이블을 지정해주지 않아도 관례를 따라 MEMBER 테이블에 적재가 된다.
+엔티티 명과 테이블 명이 다를 경우 `@Table()`을 애노테이션을 사용하여 지정해줄 수 있고, 컬럼 명도  `@Column()`을 사용해 컬럼명도 지정해줄 수 있다.
+>
+
+**회원 조회**
+
+*JpaMain*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        try {
+
+            Member findMember = em.find(Member.class, 1L);
+            System.out.println("findMember.id = " + findMember.getId());
+            System.out.println("findMember.name = " + findMember.getName());
+
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+
+        emf.close();
+    }
+}
+```
+
+*실행*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e329c33d-f368-409d-be78-59ec79d2d044/Untitled.png)
+
+**회원 삭제**
+
+*JpaMain*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        try {
+
+            Member findMember = em.find(Member.class, 1L);
+            
+            em.remove(findMember);
+            
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+
+        emf.close();
+    }
+}
+```
+
+**회원 수정**
+
+*JpaMain*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        try {
+
+            Member findMember = em.find(Member.class, 1L);
+            findMember.setName("HelloJPA");
+
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+
+        emf.close();
+    }
+}
+```
+
+*실행*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a0bfac9f-9676-4929-b5aa-3d4f973802d2/Untitled.png)
+
+find()한 Member객체의 name값을 변경만 해주었는데 Update 쿼리가 실행된게 확인된다.
+
+이유는
+
+→ JPA를 통해서 Entity를 가져오게 되면 가져온 객체는 JPA가 관리를 하게 된다.
+
+→ JPA가 관리중인 객체의 데이터가 바뀌었는지 체크를 하고 바뀐 데이터가 있을 경우, Update 쿼리를 만들어서 날리고 트랙잭션이 커밋이 된다.
+
+**주의**
+
+---
+
+- `EntityManagerFactory`는 하나만 생성해서 애프리케이션 전체에서 공유해야 한다.
+- `EntityManager`는 쓰레드간에 공유하면 안된다. (사용하고 버려야한다.)
+- **JPA의 모든 데이터 변경은 트랜잭션 안에서만 실행되어야 한다.**
+  - DB는 내부적으로 트랜잭션 개념을 가지고 있다.
+
+### JPQL 소개
+
+- 가장 단순한 조회
+  - `EntityManager.find()`
+  - 객체 그래프 탐색(a.getB().getC())
+- 나이가 18살 이상인 회원을 모두 검색하고 싶다면?
+  - JPQL이 해당 방법을 지원해줌
+
+**실습 - JPQL 소개**
+
+---
+
+*JPQL로 전체 회원 검색*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import java.util.List;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        try {
+
+            List<Member> result = em.createQuery("select m from Member as m", Member.class)
+                    .getResultList();
+
+            for (Member member : result) {
+                System.out.println("member.name = " + member.getName());
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+
+        emf.close();
+    }
+}
+```
+
+- `em.createQuery("select m from Member as m", Member.class)`를 보면 `“select m from Member as m"`을 JPQL이라 한다.
+- **JPA 입장에서 코드를 짤 때 테이블을 대상으로 절대 코드를 짜지 않고 객체를 대상으로 짠다.**
+
+*실행*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0e43ca90-fefe-4e9b-921c-4b80a44bef10/Untitled.png)
+
+*페이징 조회*
+
+```java
+package hellojpa;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import java.util.List;
+
+public class JpaMain {
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("hello");
+
+        EntityManager em = emf.createEntityManager();
+
+        EntityTransaction tx = em.getTransaction();
+        tx.begin();
+
+        try {
+
+            List<Member> result = em.createQuery("select m from Member as m", Member.class)
+                    .setFirstResult(0)
+                    .setMaxResults(10)
+                    .getResultList();
+
+            for (Member member : result) {
+                System.out.println("member.name = " + member.getName());
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            tx.rollback();
+        } finally {
+            em.close();
+        }
+
+        emf.close();
+    }
+}
+```
+
+- `setFirstReulst(0).setMaxResult(10)`메소드를 사용 하면 페이징 처리가 가능해진다.
+  - 0번째부터 시작하여 10개를 조회한다.
+
+
+*실행*
+
+![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c858b91e-384a-46fa-aa50-691945e1efda/Untitled.png)
+
+**JPQL**
+
+---
+
+- JPA를 사용하면 엔티티 객체를 중심으로 개발
+- 문제는 검색 쿼리
+- 검색을 할 때도 테이블이 아닌 엔티티 객체를 대상으로 검색
+- 모든 DB 데이터를 객체로 변환해서 검색하는 것은 불가능
+- 애플리케이션이 필요한 데이터만 DB에서 불러오려면 결국 검색 조건이 포함된 SQL이 필요
+- JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어 제공
+- SQL과 문법 유사, SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 지원
+- **JPQL은 엔티티 객체를 대상으로 쿼리**
+- SQL은 데이터베이스 테이블을 대상으로 쿼리
+- 테이블이 아닌 **객체를 대상으로 검색하는 객체 지향 쿼리**
+- SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.
+- JPQL을 한마디로 정의하면 객체 지향 SQL
