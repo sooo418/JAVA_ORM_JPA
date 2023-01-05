@@ -56,13 +56,13 @@
 - 객체는 참조를 사용: member.getTeam()
 - 테이블은 외래 키를 사용: JOIN ON M.TEAM_ID = T.TEAM_ID
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4a3f6807-9c99-4a8c-adad-33100037a458/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143234Z&X-Amz-Expires=86400&X-Amz-Signature=44cdc5830f897986713f2d431381e555883b86619ad9008ad65762f8022cf2a2&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4a3f6807-9c99-4a8c-adad-33100037a458/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143401Z&X-Amz-Expires=86400&X-Amz-Signature=2d6438d422d9125ae92b8bebb955ff45e1cb038359ac0213088684538dd08022&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 *객체를 테이블에 맞추어 모델링*
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/da489530-e9c8-46b0-8f28-95f41ab619fa/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143248Z&X-Amz-Expires=86400&X-Amz-Signature=7fb626df9cef0b168fdf9fde15a8b9147c5eb1a90f0704507142b0b96f503389&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/da489530-e9c8-46b0-8f28-95f41ab619fa/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143431Z&X-Amz-Expires=86400&X-Amz-Signature=205458643dabf22c0a0f0410d303da4acf9ab05d1fbda659440db02617d81864&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 *테이블에 맞춘 객체 저장*
 
