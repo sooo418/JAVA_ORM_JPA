@@ -169,8 +169,6 @@
 
 ## ORM?
 
----
-
 - Object-relational mapping(객체 관계 매핑)
 - 객체는 객체대로 설계
 - 관계형 데이터베이스는 관계형 데이터베이스대로 설계
@@ -179,15 +177,11 @@
 
 ## JPA는 애플리케이션과 JDBC 사이에서 동작
 
----
-
 ![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a65d56f2-0732-4c14-9cf8-c10cd88dfbe7/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150908Z&X-Amz-Expires=86400&X-Amz-Signature=6efd4b2fc5f5e7864a91a7a19a6f8d04e045fbadf900d4491dbcd262365bedeb&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 - JAVA 애플리케이션에서 DB에 접근하려면 JDBC API를 통해서 접근해야하는데 기존에는 개발자가 직접 JDBC API 썼다면 JPA가 대신 해준다고 생각하면 된다.
 
 ## JPA 동작 - 저장
-
----
 
 ![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/115b5f88-18a6-4140-bd21-c0d4f232cd06/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150924Z&X-Amz-Expires=86400&X-Amz-Signature=98cf9e8f136bab4be3281ad0d25fcd20d71e92cd1acbc9971b70d8361a05b81a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
@@ -196,16 +190,12 @@
 
 ## JPA 동작 - 조회
 
----
-
 ![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/1642816f-4e29-418c-b2ca-69c0667eb21a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150935Z&X-Amz-Expires=86400&X-Amz-Signature=4e8d814788c7166815a58ae37c5f32450d64c4b4031b929ad2f5a4490dea70a9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 - MemberDAO에서 JPA에 Member 객체를 조회하는 명령어를 내리면 JPA가 SELECT SQL을 생성하고 JDBC API를 사용하여 DB에 SELECT SQL을 실행하여 결과를 받으면 Member 객체에 맞게 ResultSet 매핑까지 다 해서 Member 객체를 반환해준다.
 - 객체와 관계형 데이터베이스의 패러다임을 해결
 
 ## JPA왜 사용해야 하는가?
-
----
 
 - SQL 중심적인 개발에서 객체 중심으로 개발
 - 생산성
@@ -217,16 +207,12 @@
 
 ### 생산성 - JPA와 CRUD
 
----
-
 - 저장: jpa.persist(member)
 - 조회: Member member = jpa.find(memberId)
 - 수정: member.setName(”변경할 이름”)
 - 삭제: jpa.remove(member)
 
 ### 유지보수
-
----
 
 **기존: 필드 변경시 모든 SQL 수정**
 
@@ -239,8 +225,6 @@
 ![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4b4ad9fb-cee3-4547-be6a-0eeb1e4753c8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151020Z&X-Amz-Expires=86400&X-Amz-Signature=0a8601824770dcce40ed67a2865c058454d5e29732c13930c6bae1cef0ee6b91&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 ### JPA와 패러다임의 불일치 해결
-
----
 
 1. JPA와 상속
 2. JPA와 연관관계
@@ -355,7 +339,7 @@
 
 *Maven Project 생성*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5de5875a-a12e-459c-9953-d514437457dc/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/5de5875a-a12e-459c-9953-d514437457dc/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143104Z&X-Amz-Expires=86400&X-Amz-Signature=ecb29790bfdc5e516ee1baf19c4c67a2a56de57265a64b32e0ae6c8a98f5627e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 **라이브러리 추가 - pom.xml**
 
@@ -447,7 +431,7 @@
 - 페이징 : MySQL은 LIMIT, Oracle은 ROWNUM
 - 방언 : SQL 표준을 지키지 않는 특정 데이터베이스만 고유한 기능
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/937ed801-8c67-46a8-b36b-d295807f5b08/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/937ed801-8c67-46a8-b36b-d295807f5b08/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143128Z&X-Amz-Expires=86400&X-Amz-Signature=22b9a98c7d2afb075c1d1bb31fd5522dd789b5311d74a51eb78e28b30794025a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 ## Hello JPA - 애플리케이션 개발
 
@@ -455,7 +439,7 @@
 
 ---
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c690d6a7-f92f-4420-a07c-e7b0f11d6660/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c690d6a7-f92f-4420-a07c-e7b0f11d6660/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143138Z&X-Amz-Expires=86400&X-Amz-Signature=982accaea577da654833d37bbd80948518a56b56055f5f276f7a9ee16ac62b10&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 1. 먼저 Persistence가 persistence.xml에 설정 정보를 읽는다.
 2. Persistence.xml을 읽어서 EntityManagerFactory를 만든다.
@@ -547,7 +531,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/dffbe2ca-5226-4b2d-9ce9-38e5c1469aaa/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/dffbe2ca-5226-4b2d-9ce9-38e5c1469aaa/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143202Z&X-Amz-Expires=86400&X-Amz-Signature=8c4859e797c52258e47c0698ef94deb06a68e7eb3136535f38391c310911f0c4&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 - 실행을 해보면 이렇게 실행된 쿼리가 로그에 찍힌다.
 - 실행된 쿼리가 로그에 표시된 이유는 `persistence.xml`에서 hibernate속성들을 설정해줬기 때문이다.
@@ -558,7 +542,7 @@ public class JpaMain {
   - `<property name="hibernate.use_sql_comments" value="true"/>`
     - 쿼리 앞에 주석으로 쿼리가 왜 출력됐는지 코멘트를 남겨줌
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8ac3172f-f159-4e72-b727-de62a3e4b31f/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/8ac3172f-f159-4e72-b727-de62a3e4b31f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143214Z&X-Amz-Expires=86400&X-Amz-Signature=44e309a58d3d155322c807ea49a4a19d87827265fbd1cbdd8f5ed0b9e7f965d2&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 - h2 콘솔에서 조회 쿼리를 실행해보면 데이터가 조회되는게 확인됨.
 
@@ -607,7 +591,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/e329c33d-f368-409d-be78-59ec79d2d044/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/e329c33d-f368-409d-be78-59ec79d2d044/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143228Z&X-Amz-Expires=86400&X-Amz-Signature=d4d4485a16d2ebace4c1873e09ce4054c35ebcf82c939043e5d50cd0890ffd7e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 **회원 삭제**
 
@@ -688,7 +672,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/a0bfac9f-9676-4929-b5aa-3d4f973802d2/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a0bfac9f-9676-4929-b5aa-3d4f973802d2/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143243Z&X-Amz-Expires=86400&X-Amz-Signature=982c95a950f18f7bff80ff8e4c7b50b4c54b7fe6ced055a6d239b9b6c10e3bb7&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 find()한 Member객체의 name값을 변경만 해주었는데 Update 쿼리가 실행된게 확인된다.
 
@@ -765,7 +749,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/0e43ca90-fefe-4e9b-921c-4b80a44bef10/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0e43ca90-fefe-4e9b-921c-4b80a44bef10/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143258Z&X-Amz-Expires=86400&X-Amz-Signature=6c7250776e3efe844dc95ddce7f40529dca11cf660b9db175e8aea59debb66ce&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 *페이징 조회*
 
@@ -816,7 +800,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c858b91e-384a-46fa-aa50-691945e1efda/Untitled.png)
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c858b91e-384a-46fa-aa50-691945e1efda/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143314Z&X-Amz-Expires=86400&X-Amz-Signature=12ddaa9ce2f8711620fb3089a8a60cb672090567dee1bdcbd097abf349ec1b98&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
 
 **JPQL**
 
