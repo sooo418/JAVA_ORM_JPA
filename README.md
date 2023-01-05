@@ -686,7 +686,7 @@ find()한 Member객체의 name값을 변경만 해주었는데 Update 쿼리가 
 
 ---
 
-- `EntityManagerFactory`는 하나만 생성해서 애프리케이션 전체에서 공유해야 한다.
+- `EntityManagerFactory`는 하나만 생성해서 애플리케이션 전체에서 공유해야 한다.
 - `EntityManager`는 쓰레드간에 공유하면 안된다. (사용하고 버려야한다.)
 - **JPA의 모든 데이터 변경은 트랜잭션 안에서만 실행되어야 한다.**
   - DB는 내부적으로 트랜잭션 개념을 가지고 있다.
