@@ -818,3 +818,339 @@ public class JpaMain {
 - 테이블이 아닌 **객체를 대상으로 검색하는 객체 지향 쿼리**
 - SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.
 - JPQL을 한마디로 정의하면 객체 지향 SQL
+# 영속성 관리
+
+## 영속성 컨텍스트
+
+**JPA에서 가장 중요한 2가지**
+
+- 객체와 관계형 데이터베이스 매핑하기(Object Relational Mapping)
+- 영속성 컨텍스트
+
+**엔티티 매니저 팩토리와 엔티티 매니저**
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/96c871c0-f7de-41f3-a46a-077706ec7e1a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131012Z&X-Amz-Expires=86400&X-Amz-Signature=ba8fca401ed1246ce0ab26abfb43b77ec7253d94587d1899086f9653c7101a55&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- 웹 어플리케이션의 서버에 고객의 요청이 들어오면 `EntityManagerFactory`에서 `EntityManager` 객체를 생성해준다. 또 새로운 고객의 요청이 들어오면 `EntityManagerFactory`에서 또 다른 `EntityManager`객체를 생성해준다.
+
+### **영속성 컨텍스트**
+
+- JPA를 이해하는데 가장 중요한 용어
+- “엔티티를 영구 저장하는 환경”이라는 뜻
+- `EntityManager.persist(entity);`
+  - `Entity`를 DB에 저장한다는 의미가 아닌 영속성 컨텍스트를 통해서 `Entity`를 영속화 한다는 의미를 가진다.
+
+**엔티티 매니저?**
+
+**영속성 컨텍스트?**
+
+- 영속성 컨텍스트는 논리적인 개념
+- 눈에 보이지 않는다.
+- 엔티티 매니저를 통해서 영속성 컨텍스트에 접근
+
+**J2SE 환경**
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/cd3efce6-f21a-4aab-8fd1-6bf3417849c3/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131035Z&X-Amz-Expires=86400&X-Amz-Signature=188ba8fb25f08cf37fc07c5b2000f85f1a2ae8f2499e6d9e62de02b9e18539ee&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- 엔티티 매니저 안에 영속성 컨텍스트라는 눈에 보이지 않는 공간이 생긴다고 생각하면 된다.
+
+### **엔티티의 생명주기**
+
+- **비영속 (new/transient)**
+
+  영속성 컨텍스트와 전혀 관계가 없는 **새로운** 상태
+
+- **영속 (managed)**
+  - `**EntityManager.persist(entity);`명령어가 실행되면 entity 객체가 영속상태가 된다.**
+
+  영속성 컨텍스트에 **관리**되는 상태
+
+- **준영속 (detached)**
+
+  영속성 컨텍스트에 저장되었다가 **분리**된 상태
+
+- **삭제 (removed)**
+
+  **삭제**된 상태
+
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4240bfea-2c3c-4bb3-9d1e-4260f7e882a7/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131101Z&X-Amz-Expires=86400&X-Amz-Signature=f382478d346e51f30ba05d1e5c02891ec01bbb5da06834a39952ad830e43afd8&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+---
+
+**비영속**
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/1562ea2c-a367-4f9e-bb29-4aabf04e6ac5/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131112Z&X-Amz-Expires=86400&X-Amz-Signature=9037a1457f2d3c6975829e4e1c0c19ef2c86ea1e9cc6f53b831c0f8f5ab845f0&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+```java
+//객체를 생성한 상태(비영속)
+Member member = new Member();
+member.setId("member1");
+member.setUsername("회원1");
+```
+
+**영속**
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d94557ed-ccff-4e4c-96f5-4eb99a033f40/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131122Z&X-Amz-Expires=86400&X-Amz-Signature=5da27ce360a2974bf5fd97ccb8681ff189b9e80b40cc02118f4b9042e79cca8c&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+```java
+//객체를 생성한 상태(비영속)
+Member member = new Member();
+member.setId("member1");
+member.setUsername(“회원1”);
+
+EntityManager em = emf.createEntityManager();
+em.getTransaction().begin();
+
+//객체를 저장한 상태(영속)
+em.persist(member);
+```
+
+- `persist(entity);`가 실행된다고 바로 DB에 entity 데이터가 저장되는건 아니다.
+  - `pertsist(entity);`는 entity 객체를 영속 상태로 만들어 주지만, DB에 저장하는 명령어는 아니다.
+
+*확인해보기*
+
+```java
+//비영속
+Member member = new Member();
+member.setId(1L);
+member.setName("HelloJPA");
+
+//영속
+System.out.println("=== BEFORE ===");
+em.persist(member);
+System.out.println("=== AFTER ===");
+
+tx.commit();
+```
+
+*실행*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/6356a498-3a68-4f0d-97c1-7b205dbbb0d8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131138Z&X-Amz-Expires=86400&X-Amz-Signature=0870ae0ff7261ffeede3f16afeee4e904a2028198d49f5b9ecf8ef154ad043c9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- Insert 쿼리가 ‘=== AFTER ===’ 로그가 찍히고 실행되는게 확인이 된다.
+  - **Insert 쿼리는 `tx.commit();`이 명령어가 실행되면서 트랜잭션이 커밋되기 직전에 Insert 쿼리가 실행이 된다.**
+
+**준영속, 삭제**
+
+```java
+//회원 엔티티를 영속성 컨텍스트에서 분리, 준영속 상태
+em.detach(member);
+```
+
+- 영속 상태에서 `em.detach(member);`를 실행하면 비영속 상태가 된다.
+
+```java
+//객체를 삭제한 상태(삭제)
+em.remove(member);
+```
+
+- 실제 DB에서 데이터를 지운다는 명령어다.
+
+### **영속성 컨텍스트의 이점**
+
+- 1차 캐시
+- 동일성(identity) 보장
+- 트랜잭셕을 지원하는 쓰기 지원
+  (transactional write-behind)
+- 변경 감지
+  (Dirty Checking)
+- 지연 로딩
+  (Lazy Loading)
+
+**엔티티 조회, 1차 캐시**
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2b4efecc-a62d-4083-8bb3-2b087ac8702f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131151Z&X-Amz-Expires=86400&X-Amz-Signature=7d1a1a47a88ef8df36232e760f9a9194575c83eab583d44721e7eee498048b18&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+```java
+//엔티티를 생성한 상태(비영속)
+Member member = new Member();
+member.setId("member1");
+member.setUsername("회원1");
+
+//엔티티를 영속
+em.persist(member);
+```
+
+- 1차 캐시를 영속성 컨텍스트라고 이해해도 된다.
+- 1차 캐시에 Entity를 저장할 때는 Map형식으로 key가 Id값인 `member1` value는 `member` 객체 자신이 세팅되어 저장이 된다.
+
+**1차 캐시에서 조회**
+
+```java
+Member member = new Member();
+member.setId("member1");
+member.setUsername("회원1");
+
+//1차 캐시에 저장됨
+em.persist(member);
+
+//1차 캐시에서 조회
+Member findMember = em.find(Member.class, "member1");
+```
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/26c9bd60-0c44-4832-b6d9-2aa1d40019d4/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131207Z&X-Amz-Expires=86400&X-Amz-Signature=c9c6c5e72bfea22c5d9e3ba90ba9a6a0802781f5ae521a38140cc7ae21c80b76&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- `member`객체를 영속성 컨텍스트 즉 1차 캐시에 저장이 되면 `em.find(Member.class, "member1");`명령어 실행시 먼저 1차 캐시에 저장된 객체를 조회한다.
+
+**데이터베이스에서 조회**
+
+`Member findMember2 = em.find(Member.class, "member2");`
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f50d68c3-5be3-4789-8a5e-2c5d139612e0/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131218Z&X-Amz-Expires=86400&X-Amz-Signature=b8061f15a980d5cf201836b2cad1c5f5d34af4b362bfdaa157a7c86ecc59a1f9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+1. `em.find(Member.class, "member2");`명령어가 실행이 되면 member2 객체를 먼저 1차 캐시에서 조회를 하게 된다.
+2. 1차 캐시에서 조회가 안되기 때문에 결국에는 SELECT SQL을 생성해 DB에 접근해 member2 객체를 조회한다.
+3. 조회한 member2 객체를 1차 캐시에 저장한다.
+4. 1차 캐시에 저장된 member2 객체를 반환한다.
+
+> 참고: 영속성 컨텍스트의 1차 캐시의 성능의 이점은 굉장히 미미하다.
+→ 트랜잭션이 끝나면 1차 캐시도 날라가기 때문에 사실상 같은 트랜잭션상에서 같은 데이터를 조회하는 상황 자주 일어나지 않는다.
+>
+
+*1차 캐시 확인해보기*
+
+```java
+//비영속
+Member member = new Member();
+member.setId(101L);
+member.setName("HelloJPA");
+
+//영속
+System.out.println("=== BEFORE ===");
+em.persist(member);
+System.out.println("=== AFTER ===");
+
+Member findMember = em.find(Member.class, 101L);
+
+System.out.println("findMember.id = " + findMember.getId());
+System.out.println("findMember.name = " + findMember.getName());
+
+tx.commit();
+```
+
+*실행*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/60a1d574-c0eb-44f1-8c58-25cdb17667e3/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131231Z&X-Amz-Expires=86400&X-Amz-Signature=96eb4850538829c4da5d50930bb0bcd69f7d191f75532710f7dbe93316cbc83a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- 분명히 `em.find(Member.class, 101L);`명령어를 실행했는데 SELECT SQL 로그가 찍히지 않았다.
+  → `em.find(Member.class, 101L);`를 하기 앞서 `em.persist(member);`가 먼저 실행이 되서 member 객체가 1차 캐시에 올라가서 `em.find(Member.class, 101L);`가 실행될 때 SQL문으로 DB에 접근하지 않고 1차 캐시에서 key값이 ‘101L’인 member 객체를 조회해서 값을 받게 된다.
+
+**영속 엔티티의 동일성 보장**
+
+```java
+Member a = em.find(Member.class, "member1");
+Member b = em.find(Member.class, "member1");
+
+System.out.println(a == b); //동일성 비교 true
+```
+
+- 1차 캐시로 반복 가능한 읽기(REPEATABLE READ) 등급의 트랜잭션 격리 수준을 데이터베이스가 아닌 애플리케이션 차원에서 제공 → 사용하는 DB의 Isolation Level이 `COMMITED READ` 여도 `REPEATABLE READ`트랜잭션 격리 수준을 갖는다.
+
+**엔티티 등록**
+
+**트랜잭션을 지원하는 쓰기 지연**
+
+```java
+EntityManager em = emf.createEntityManager();
+EntityTransaction transaction = em.getTransaction();
+//엔티티 매니저는 데이터 변경시 트랜잭션을 시작해야 한다.
+transaction.begin(); // [트랜잭션] 시작
+
+em.persist(memberA);
+em.persist(memberB);
+//여기까지 INSERT SQL을 데이터베이스에 보내지 않는다.
+
+//커밋하는 순간 데이터베이스에 INSERT SQL을 보낸다.
+transaction.commit(); // [트랜잭션] 커밋
+```
+
+*동작 그림*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/424a43c7-18b1-4640-9e7a-2d8071bd25ee/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131247Z&X-Amz-Expires=86400&X-Amz-Signature=ad6f30c84aa22bfbbf931b0b98129041a1182faaf0ed29efc576a13bcba1f5b0&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- `em.persist(memberA);`명령어가 실행이 되면 영속성 컨텍스트의 1차 캐시에 memberA 객체가 저장되고 동시에 memberA 객체를 분석해 Insert SQL을 생성해 쓰기 지연 SQL 저장소에 저장을 한다.
+- `em.persist(memberB);`명령어도 마찬가지로 memberB 객체가 1차 캐시에 저장되고 Insert SQL을 생성해서 쓰기 지연 SQL 저장소에 차곡차곡 쌓게 된다.
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0f6527f0-1a2a-4562-a759-d4ab65f0005c/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131258Z&X-Amz-Expires=86400&X-Amz-Signature=5a81f8e052e383570b58356329cf593392425c3544b5a5b15ff6c5cd7fe9cf8b&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- `transaction.commit();`명령어가 실행되면 데이터베이스를 커밋하기 직전에
+  `**flush`명령어를 날려서 쓰기 지연 SQL 저장소에 저장되있던 SQL 문들을 실행해주고 데이터베이스가 커밋이 된다.**
+  - `flush`는 영속성 컨텍스트의 변경 내용을 데이터베이스에 동기화하는 작업인데 이때 등록, 수정, 삭제한 엔티티를 데이터베이스에 반영한다.
+
+*확인해보기*
+
+```java
+Member member1 = new Member(150L, "A");
+Member member2 = new Member(160L, "B");
+
+em.persist(member1);
+em.persist(member2);
+
+System.out.println("==================================");
+
+tx.commit();
+```
+
+*실행*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/b58726ce-662b-48fd-b5ce-734409244192/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131311Z&X-Amz-Expires=86400&X-Amz-Signature=3edb9e185d476f2c2424ad6979d8860e9872db47faa668713bc26576f9711e33&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- “===========================” 로그가 찍히고 Insert 쿼리 2개가 로그에 찍힌게 확인이 된다.
+
+*버퍼링 기능*
+
+- `persistence.xml`파일에서 하이버네이트의 옵션 `<property name="hibernate.jdbc.batch_size" value="10"/>`을 사용하면 10의 사이즈만큼 쿼리를 모았다가 한 번에 전달할 수 있다.
+
+> `em.persist(member1);`나 `em.persist(member2);`가 실행되자마자 즉시 등록 쿼리를 데이터베이스에 보내나 등록쿼리를 메모리에 모아놓고 트랜잭션이 커밋되기 직전에 데이터베이스에 보내나 트랜잭션 범위 안에서 실행되므로 둘의 결과는 같다.
+member1, member2 모두 트랜잭션을 커밋하면 함께 저장되고 롤백하면 함께 저장되지 않는다. 등록 쿼리를 즉각적으로 데이터베이스에 전달해도 트랜잭션을 커밋하지 않으면 아무 소용이 없다. 어떻게든 커밋 직전에만 데이터베이스에 SQL을 전달하면 된다. 이것이 트랙잭션을 지원하는 쓰기 지연이 가능한 이유다.
+**※ 이 기능을 잘 활용하면 모아둔 등록 쿼리를 데이터베이스에 한 번에 전달해서 성능을 최적화할 수 있다.**
+>
+
+**변경 감지**
+
+```java
+Member member = em.find(Member.class, 150L);
+/* member id:150
+	 member name:'A' */
+
+member.setName("ZZZZZ");
+/* member id:150
+	 member name:'ZZZZZ' */
+
+System.out.println("==================================");
+
+tx.commit();
+```
+
+*실행*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d5a4f0c9-a5c6-4dda-937c-7465e9169c04/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131326Z&X-Amz-Expires=86400&X-Amz-Signature=b43c1c004d7e00e296272c5d8576c5b535dc7b6bacdb5ce65ebd9a09edc346e1&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- member 객체를 조회하는 SELECT 쿼리가 실행이되고 member 객체의 UPDATE 쿼리가 실행이 된다.
+- 코드를 보면 `em.update();`라는 명령어가 실행되어야 할 것 같지만 이런 메소드는 없다.
+- **변경 감지(dirty checking)**라는 기능 덕에 이렇게 DB에 UPDATE해주는 명령어가 없어도 변경사항을 데이터베이스에 자동으로 반영해준다.
+
+*변경 감지 - 동작 방식 그림*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f54fe2a5-e390-4dbc-97ad-507dcbde5eba/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131337Z&X-Amz-Expires=86400&X-Amz-Signature=3e9f06344e6c5b31e97a8c3dfb463f2c56eeeb25b705973c69f9a0159fe52160&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- JPA는 엔티티를 영속성 컨텍스트에 보관할 때, 최초 상태를 복사해서 저장해두는데 이것을 스냅샷이라 한다.
+- 플러시 시전에 스냅샷과 엔티티를 비교해서 변경된 엔티티를 찾는다.
+
+1. 트랜잭션을 커밋하면 `EntityManager` 내부에서 먼저 플러시(`flush()`)가 호출된다.
+2. 엔티티와 스냅샷을 비교해서 변경된 엔티티를 찾는다.
+3. 변경된 엔티티가 있으면 수정 쿼리를 생성해서 쓰기 지연 SQL 저장소에 보낸다.
+4. 쓰기 지연 저장소의 SQL을 데이터베이스에 보낸다.
+5. 데이터베이스 트랜잭션을 커밋한다.
+
+**엔티티 삭제**
+
+```java
+//삭제 대상 엔티티 조회
+Member memberA = em.find(Member.class, “memberA");
+em.remove(memberA); //엔티티 삭제
+```
+
+- DELETE SQL을 쓰기 지연 저장소의 저장하고 트랜잭션을 커밋하기 직전에 DB에 전달한다.
