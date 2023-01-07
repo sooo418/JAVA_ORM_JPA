@@ -1219,3 +1219,138 @@ em.remove(memberA); //엔티티 삭제
 ```
 
 - DELETE SQL을 쓰기 지연 저장소의 저장하고 트랜잭션을 커밋하기 직전에 DB에 전달한다.
+## 플러시
+
+- 영속성 컨텍스트의 변경내용을 데이터베이스에 반영
+
+**플러시 발생**
+
+- 변경감지
+- 수정된 엔티티 쓰기 지연 SQL 저장소에 등록
+- 쓰기 지연 SQL 저장소의 쿼리를 데이터베이스에 전송(등록, 수정, 삭제 쿼리)
+
+**영속성 컨텍스트를 플러시하는 방법**
+
+- em.flush() - 직접 호출
+- 트랜잭션 커밋 - 플러시 자동 호출
+- JPQL 쿼리 실행 - 플러시 자동 호출
+
+**JPQL 쿼리 실행시 플러시가 자동으로 호출되는 이유**
+
+```java
+em.persist(memberA);
+em.persist(memberB);
+em.persist(memberC);
+
+//중간에 JPQL 실행
+query = em.createQuery("select m from Member m", Member.class);
+List<Member> members= query.getResultList();
+```
+
+- JPQL을 실행되지 전에 memberA, memberB, memberC 객체들은 DB에 Insert 쿼리가 실행되지 않았기 때문에 DB에 저장된 데이터들이 아니다.
+- **이때 JPQL일 실행되면 JPQL은 SQL로 변역이 되어 DB에 실행**되기 때문에 memberA, memberB, memberC 객체는 조회가 안되게 된다.
+- 이런 현상을 방지하고자 JPQL 쿼리가 실행되면 SQL을 실행하기 전에 무조건 플러시를 호출하게 된다.
+
+**플러시 모드 옵션**
+
+`em.setFlushMode(FlushModeType.COMMIT)`
+
+- FlushModeType.AUTO
+  커밋이나 쿼리를 실행할 때 플러시(기본값)
+- FlushModeType.COMMIT
+  커밋할 때만 플러시
+
+> 참고: 플러시 모드 옵션은 사실 알고 있을 필요는 없지만 FlushModeType.COMMIT이 가끔 사용되는 일이 있어서 이런게 있구나 라고만 알고 있으면 된다.
+>
+
+*FlushModeType.COMMIT 이 사용되는 사례*
+
+```java
+em.persist(memberA);
+em.persist(memberB);
+em.persist(memberC);
+
+//중간에 JPQL 실행
+query = em.createQuery("select o from Order o", Order.class);
+List<Order> orders= query.getResultList();
+```
+
+- 위의 코드처럼 JPQL이 실행될 때 Member 객체를 조회하는 JPQL이 아니라면 memberA, memberB, memberC 객체를 DB에 저장해놓아야 할 이유가 없기 때문에 가끔 사용이 된다.
+
+**플러시는!**
+
+- 영속성 컨텍스트를 비우지 않음
+- 영속성 컨텍스트의 변경 내용을 데이터베이스에 동기화
+- 트랜잭션이라는 작업 단위가 중요 → 커밋 직전에만 동기화하면 됨
+
+## 준영태 상태
+
+- 영속 → 준영속
+- 영속 상태의 엔티티가 영속성 컨텍스트에서 분리(detached)
+- 영속성 컨텍스트가 제공하는 기능을 사용 못함
+
+**준영속 상태로 만드는 방법**
+
+- em.detach(entity)
+  특성 엔티티만 준영속 상태로 전환
+- em.clear()
+  영속성 컨텍스트를 완전히 초기화
+- em.close()
+  영속성 컨텍스트를 종료
+
+# 엔티티 매핑
+
+**목차**
+
+---
+
+- 객체와 테이블 매핑
+- 데이터베이스 스키마 자동 생성
+- 필드와 컬럼 매핑
+- 기본 키 매핑
+- 실전 예제 - 1. 요구사항 분석과 기본 매핑
+
+**엔티티 매핑 소개**
+
+---
+
+- 객체와 테이블 매핑: `@Entity`, `@Table`
+- 필드와 컬럼 매핑: `@Column`
+- 기본 키 매핑: `@Id`
+- 연관관계 매핑: `@ManyToOne`, `@JoinColumn`
+
+## 객체와 테이블 매핑
+
+**@Entity**
+
+---
+
+- `@Entity`가 붙은 클래스는 JPA가 관리, 엔티티라 한다.
+- JPA를 사용해서 테이블과 매핑할 클래스는 `@Entity` 필수
+- 주의
+  - 기본 생성자 필수(파라미터가 없는 public 또는 protected 생성자)
+  - final 클래스, enum, interface, inner 클래스 사용 X
+  - 저장할 필드에 final 사용 X
+
+**@Entity 속성 정리**
+
+---
+
+- 속성: name
+  - JPA에서 사용할 엔티티 이름을 지정한다.
+  - 기본값: 클래스 이름을 그대로 사용(예: Member)
+  - 같은 클래스 이름이 없으면 가급적 기본값을 사용한다.
+
+
+**@Table**
+
+---
+
+- `@Table`은 엔티티와 매핑할 테이블 지정
+
+| 속성 | 기능 | 기본값 |
+| --- | --- | --- |
+| name | 매핑할 테이블 이름 | 엔티티 이름을 사용 |
+| catalog | 데이터베이스 catalog 매핑 |  |
+| schema | 데이터베이스 schema 매핑 |  |
+| uniqueConstraints(DDL) | DDL 생성 시에 유니크 제약 조건 생성 |  |
