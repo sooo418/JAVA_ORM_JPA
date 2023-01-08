@@ -1354,3 +1354,101 @@ List<Order> orders= query.getResultList();
 | catalog | 데이터베이스 catalog 매핑 |  |
 | schema | 데이터베이스 schema 매핑 |  |
 | uniqueConstraints(DDL) | DDL 생성 시에 유니크 제약 조건 생성 |  |
+
+**데이터베이스 스키마 자동 생성**
+
+---
+
+- DDL을 애플리케이션 실행 시점에 자동 생성
+- 테이블 중심 → 객체 중심
+- 데이터베이스 방언을 활용해서 데이터베이스에 맞는 적절한 DDL 생성
+- 이렇게 **생성된 DDL은 개발 장비에서만 사용**
+- 생성된 DDL은 운영서버에서는 사용하지 않거나, 적절히 다듬은 후 사용
+
+**데이터베이스 스키마 자동 생성 - 속성**
+
+---
+
+`hibernate.hbm2ddl.auto`
+
+| 옵션 | 설명 |
+| --- | --- |
+| create | 기존 테이블 삭제 후 다시 생성 (DROP + CREATE) |
+| create-drop | create와 같으나 종료 시점에 테이블 DROP |
+| update | 변경분만 반영(운영 DB에는 사용하면 안됨) |
+| validate | 엔티티와 테이블이 정상 매핑되었는지만 확인 |
+| none | 사용하지 않음 |
+
+*persistence.xml*
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 필수 속성 -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
+            <property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>
+
+            <!-- 옵션 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+            <property name="hibernate.jdbc.batch_size" value="10"/>
+            <property name="hibernate.hbm2ddl.auto" value="create" />
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+*실행*
+
+![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0423eb47-f02f-4890-a29c-55428aca54bd/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230108%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230108T085427Z&X-Amz-Expires=86400&X-Amz-Signature=a0e53906d2144085750860caa4901170d8b0cc9498a5fb61ab721bb8e7601c5a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+
+- Member 테이블을 DROP하고 CREATE 한다.
+
+*create-drop*
+
+- `<property name="hibernate.hbm2ddl.auto" value="create-drop"/>`
+  - create와 같이 DROP - CREATE를 실행한 후 애플리케이션이 종료되는 시점에 DROP을 실행
+
+*update*
+
+- `<property name="hibernate.hbm2ddl.auto" value="update"/>`
+  - 기존에 있는 테이블 정보와 받은 객체의 정보를 비교해 ALTER 처리해줌
+  - 추가하는건 되지만 지우는건 불가능
+
+*validate*
+
+- `<property name="hibernate.hbm2ddl.auto" value="validate"/>`
+  - 기존에 있는 테이블 정보와 받은 객체의 정보를 비교하여 같을 경우에만 애플리케이션이 실행됨
+
+*none*
+
+- `<property name="hibernate.hbm2ddl.auto" value="none"/>`
+  - `hibernate.hbm2ddl.auto` 옵션을 제거하거나 value에 none을 넣어서 아무것도 실행안하게 할 수 있다.
+  - 관례상 none이라는 값을 사용하지 아무렇게나 입력해도 결과는 같다.
+
+**데이터베이스 스키마 자동 생성 - 주의**
+
+---
+
+- **운영 장비에는 절대 create, create-drop, update 사용하면 안됨**
+- 개발 초기 단계는 create 또는 update
+- 테스트 서버는 update 또는 validate
+- 스테이징과 운영 서버는 validate 또는 none
+
+**DDL 생성 기능**
+
+---
+
+- 제약조건 추가: 회원 이름은 **필수**, 10자 초과 X
+  - `@Column(nullable = false, length = 10)`
+- 유니크 제약조건 추가
+  - `@Table(uniqueConstraints = {@UniqueConstraint( name = "NAME_AGE_UNIQUE", columnNames = {"NAME", "AGE"} )})`
+- DDL 생성 기능은 DDL을 자동 생성할 때만 사용되고 JPA의 실행 로직에는 영향을 주지 않는다.

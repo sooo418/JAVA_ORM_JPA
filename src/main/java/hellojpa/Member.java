@@ -10,6 +10,8 @@ public class Member {
     private Long id;
     private String name;
 
+    private int gogo2;
+
     public Member() {
 
     }
