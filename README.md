@@ -1665,6 +1665,7 @@ private Long id;
 - JPA는 보통 트랜잭션 커밋 시점에 INSERT SQL 실행
 - AUTO_INCREMENT는 데이터베이스에 INSERT SQL을 실행한 이후에 ID값을 알 수 있음
 - IDENTITY 전략은 `em.persist()`시점에 즉시 INSERT SQL 실행하고 DB에서 식별자를 조회
+  - 영속성 컨텍스트의 1차 캐시에 Entity를 등록하려면 키값인 ID값이 있어야 하기 때문에 예외적으로 em.persist()시점에 즉시 INSERT SQL을 실행한다.
 
 *Member*
 
@@ -1672,7 +1673,7 @@ private Long id;
 @Entity
 public class Member {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -1683,8 +1684,6 @@ public class Member {
     //Getter, Setter ...
 }
 ```
-
-- h2 DB는 `SEQUENCE` 사용
 
 *JpaMain*
 
@@ -1819,3 +1818,23 @@ public class Member {
 - 미래까지 이 조건을 만족하는 자연키는 찾기 어렵다. 대리키(대체키)를 사용하자.
 - 예를 들어 주민등록번호도 기본 키로 적절하지 않다.
 - **권장: Long형 + 대체키 + 키 생성전략 사용**
+
+> **주의:
+SequenceGenerator.allocationSize의 기본값이 50인 것에 주의해야 한다. JPA가 기본으로 생성하는 데이터베이스 시퀀스는 create sequence [sequenceName] start with 1 increment by 50이므로 시퀀스를 호출할 때마다 값이 50씩 증가한다. 기본값이 50인 이유는 최적화 때문이다. 데이터베이스 시퀀스 값이 하나씩 증가하도록 설정되어 있으면 이 값을 반드시 1로 설정해야 한다.**
+>
+
+> **참고:
+SEQUENCE 전략과 최적화
+SEQUENCE 전략과 데이터베이스 시퀀스를 통해 식별자를 조회하는 추가 작업이 필요하다. 따라서 데이터베이스와 2번 통신한다.**
+
+> 1. 식별자를 구하려고 데이터베이스 시퀀스를 조회환다.
+   EX) SELECT BOARD_SEQ.NEXTVAL FROM DUAL
+> 2. 조회한 시퀀스를 기본 키 값으로 사용해 데이터베이스에 저장한다.
+  EX) INSERT INTO BOARD…
+  JPA는 시퀀스에 접근하는 횟수를 줄이기 위해 `@SequenceGenerator.allocationSize`를 사용한다. 간단히 설명하자면 여기에 설정한 값만큼 한 번에 시퀀스 값을 증가시키고 나서 그만큼 메모리에 시퀀스 값을 할당한다. 예를 들어 allocationSize 값이 50이면 시퀀스를 한 번에 50 증가시킨 다음에 1~50까지는 메모리에서 식별자를 할당한다. 그리고 51이 되면 시퀀스 값을 100으로 증가시킨 다음 51~100까지 메모리에서 식별자를 할당한다.
+
+> **이 최적화 방법은 시퀀스 값을 선점하므로 여러 JVM이 동시에 동작해도 기본 키 값이 충돌하지 않는 장점이 있다. 반면에 데이터베이스에 직접 접근해서 데이터를 등록할 때 시퀀스 값이 한 번에 많이 증가한다는 점을 염두해두어야 한다. 이런 상황이 부담스럽고 INSERT 성능이 중요하지 않으면 allocationSize의 값을 1로 설정하면 된다.**
+
+> **참고로 앞서 설명한 `hibernate.id.new_generator_mappings` 속성을 true로 설정해야 지금까지 설명한 최적화 방법이 적용된다. 이 속성을 적용하지 않으면 하이버네이크가 과거에 사용하던 방법으로 키 생성을 최적화한다. 과거에는 시퀀스 값을 하나씩 할당받고 애플리케이션에서 allocationSize만큼 사용했다. 예를 들어 allocationSize를 50으로 설정했다고 가정하면, 반환된 시퀀스 값이 1이면 애플리케이션에서 1~50까지 사용하고 시퀀스 값이 2이면 애플리케이션에서 51~100까지 기본 키를 사용하는 방식이었다.**
+
+- `실전 예제 1 - 요구사항 분석과 기본 매핑`은 jpabook 프로젝트에서 진행 

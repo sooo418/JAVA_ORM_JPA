@@ -19,7 +19,9 @@ public class JpaMain {
             Member member = new Member();
             member.setUsername("A");
 
+            System.out.println("=================");
             em.persist(member);
+            System.out.println("=================");
 
             tx.commit();
         } catch (Exception e) {
