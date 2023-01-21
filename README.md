@@ -2183,3 +2183,110 @@ JOIN MEMBER M ON T.TEAM_ID = M.TEAM_ID
 
 - **연관관계의 주인인 다대일(N:1)일 때 N쪽이 연관관계의 주인이 되면 된다.**
 - **Ex) 자동차와 바퀴의 관계에서 비즈니스적으로는 자동차가 주인이지만 연관관계의 주인은 바퀴로 잡아야하는 것이다.**
+
+**양방향 매핑시 가장 많이 하는 실수(연관관계의 주인에 값을 입력하지 않음)**
+
+---
+
+*JpaMain*
+
+```java
+//저장
+Member member = new Member();
+member.setUsername("member1");
+em.persist(member);
+
+Team team = new Team();
+team.setName("TeamA");
+team.getMembers().add(member);
+em.persist(team);
+```
+
+- 언뜻 보기에는 Team 엔티티의 `List<Member>` 컬렉션에 Member 엔티티를 `add()`해줬으니 둘의 연관관계가 성립될거라 오해할 수 있다.
+- 하지만 실행 결과를 보면,
+
+![](img/img_7.png)
+
+- Member 데이터의 TEAM_ID값이 null인게 확인된다.
+
+**양방향 매핑시 연관관계의 주인에 값을 입력해야 한다.**
+
+**(순수한 객체 관계를 고려하면 항상 양쪽 다 값을 입력해야 한다.)**
+
+---
+
+*JpaMain*
+
+```java
+//저장
+Team team = new Team();
+team.setName("TeamA");
+//team.getMembers().add(member);
+em.persist(team);
+
+Member member = new Member();
+member.setUsername("member1");
+member.setTeam(team);
+em.persist(member);
+```
+
+![](img/img_8.png)
+
+### 양방향 연관관계 주의 - 실습
+
+- **순수 객체 상태를 고려해서 항상 양쪽에 값을 설정하자**
+- 연관관계 편의 메소드를 생성하자
+- 양방향 매핑시에 무한 루프를 조심하자
+  - 예: toString(), lombok, JSON 생성 라이브러리
+
+**연관관계 편의 메소드**
+
+---
+
+*Member*
+
+```java
+public void changeTeam(Team team) {
+    this.team = team;
+    team.getMembers().add(this);
+}
+```
+
+- Member 클래스에 멤버 함수를 만들어 Team 엔티티를 `set()`해주면서 인자로 들어온 Team 객체의 Member 엔티티와의 연관관계인 `List<Member>`컬렉션에 자기 자신을 `add()`해준다.
+
+*또는 Team*
+
+```java
+public void addMember(Member member) {
+    this.members.add(member);
+    member.setTeam(this);
+}
+```
+
+- Team 클래스에 멤버 함수를 만들어 Member 엔티티를 `List<Member>`컬렉션에 `add()`해주고 인자로 들어온 Member 객체에 자기 자신을 `set()`해준다.
+
+> **주의: 둘 중 하나의 편의 메소드만 사용해야 한다.
+최악의 경우 무한루프가 걸리게 된다.**
+>
+
+> **주의**
+> 1. toString(): 연관관계가 있는 엔티티 둘 다 toString()을 생성해주고 `Member.toString()` 호출시 member.toString() → team.toString() → member.toString() … 으로 무한루프가 돌게 된다.
+> 2. lombok 사용시 toString()이 자동으로 생성되기 때문에 주의해서 사용해야 한다.
+> 3. JSON생성 라이브러리 사용시 엔티티를 JSON객체로 변환하게 되면 Member 엔티티의 Team 엔티티를 JSON으로 변환하려하고 또 Team의 Members 를 JSON으로 변환하려고 하다보면 무한루프가 돌게 된다. → 컨트롤러에서는 엔티티를 반환하지 말고, DTO객체로 변환해서 반환해야 한다.
+>
+
+**양방향 매핑 정리**
+
+---
+
+- **단방향 매핑만으로도 이미 연관관계 매핑은 완료**
+- 양방향 매핑은 반대 방향으로 조회(객체 그래프 탐색) 기능이 추가된 것 뿐
+- JPQL에서 역방향으로 탐색할 일이 많음
+- 단방향 매핑을 잘 하고 양방향은 필요할 때 추가해도 됨(테이블에 영향을 주지 않음)
+
+**연관관계의 주인을 정하는 기준**
+
+---
+
+- 비즈니스 로직을 기준으로 연관관계의 주인을 선택하면 안됨
+- **연관관계의 주인은 외래 키의 위치를 기준으로 정해야함**
