@@ -46,7 +46,7 @@
 
 **상속**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/81fa39e4-4cc3-4c88-8f55-8bb3588d0e13/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143215Z&X-Amz-Expires=86400&X-Amz-Signature=cccb9c9e4cbeedb992dc31ff3234b33b0068e302aa46dec1ed06f8343a80b8c0&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_9.png)
 
 - 기본적으로 관계형 데이터베이스에는 상속이란 개념이 없다.
 - 관계형 데이터베이스에서는 상속 대신 슈퍼타입 서브타입 관계라는 개념이 존재함
@@ -56,19 +56,19 @@
 - 객체는 참조를 사용: member.getTeam()
 - 테이블은 외래 키를 사용: JOIN ON M.TEAM_ID = T.TEAM_ID
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4a3f6807-9c99-4a8c-adad-33100037a458/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143401Z&X-Amz-Expires=86400&X-Amz-Signature=2d6438d422d9125ae92b8bebb955ff45e1cb038359ac0213088684538dd08022&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_10.png)
 
 *객체를 테이블에 맞추어 모델링*
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/da489530-e9c8-46b0-8f28-95f41ab619fa/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143431Z&X-Amz-Expires=86400&X-Amz-Signature=205458643dabf22c0a0f0410d303da4acf9ab05d1fbda659440db02617d81864&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_11.png)
 
 *테이블에 맞춘 객체 저장*
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f650129d-dc27-4f23-b132-02b8c2147f1b/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143259Z&X-Amz-Expires=86400&X-Amz-Signature=6fa9724d93325687c7ad4ddf3fdd389f4f2f3e2f21c0bf10a3e9a4076dd95eb9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_12.png)
 
 - 관계형 데이터베이스에 저장할때 바로 `Member` 객체가 가지고 있는 필드를 가져와서 인자로 넣어주면 된다.
 - 하지만 `Member` 객체와 `Team` 객체의 연관관계가 객체다운 형태는 아니다.
@@ -77,13 +77,13 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/40aeaac7-8b3f-46d9-b691-90d4e7db555f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143307Z&X-Amz-Expires=86400&X-Amz-Signature=d249e47f84ec725e0897a6276340aa9f058e2348dd25645583327dd0011ee999&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_13.png)
 
 *객체 모델링 저장*
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/5174cf23-7500-4d79-867a-96a04df1f815/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143317Z&X-Amz-Expires=86400&X-Amz-Signature=0cd58036746b60b77fa34428103db48bb3cc467aa62023c0b9550888bcae56bd&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_14.png)
 
 - `Member` 객체에서 `Team` 객체를 꺼내고 또 `team_id`를 가져 와야 하는 번잡함이 있다.
 
@@ -91,13 +91,13 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/7e2f11d2-be94-40a2-8682-3672571fdaaf/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143327Z&X-Amz-Expires=86400&X-Amz-Signature=6ed2359a5a41f4db9187b101ce974421ba86c4c831c31aa8c3a72b84ba9224e3&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_15.png)
 
 - 데이터베이스의 성능을 위해 `Member`와 `Team` 객체를 한번에 조회를 하게된다. 조회쿼리 실행 후 `Member` 객체의 정보를 `set()` 해주고 또 `Team` 객체의 정보를 `set()` 해주고 그리고 `Member` 객체에 `Team` 객체를 `set()` 해줘야하는 번거로움이 발생한다.
 
 *객체 모델링, 자바 컬렉션에 관리*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ae8d1adb-e063-4d08-8106-5c672f993bc8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143518Z&X-Amz-Expires=86400&X-Amz-Signature=4c3d55f429aea0dbd0859bbd83e7592455972d543cc7395f6d4af639b1ea3f6a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_16.png)
 
 - 만약 이렇게 객체를 관계형 데이터베이스가 아닌 자바 컬렌션에 저장을 할 수 있다 가정하면 코드 한줄로 객체를 저장하고 조회가 가능하다.
 
@@ -109,7 +109,7 @@
 
 객체는 자유롭게 객체 그래프를 탐색할 수 있어야 한다.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/88783334-d5a7-40f8-8a33-a2af79a53182/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143533Z&X-Amz-Expires=86400&X-Amz-Signature=a6b89f07e49411c3da43f161fa2d762f2bb659d0a3443ae01bfbc1b1d7d0a8f7&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_17.png)
 
 - Member.getTeam(), Member.getOrder(), Order.getDelivery() 등등.. 객체에서 객체로 다 따라갈 수 있어야 한다.
 
@@ -117,7 +117,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/b9745e55-e8f3-43ef-ba94-f859c84fbb4a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143541Z&X-Amz-Expires=86400&X-Amz-Signature=93b90e23999b67a9da43bbf88c63d7cf5944008f7fec3c7aaf6743360eefdfd9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_18.png)
 
 - 조회 쿼리 작성시 `Member`와 `Team` 객체만 조회를 하게되면 `Member` 객체에 `Order` 객체는 존재하지 않게 된다.
 
@@ -125,7 +125,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/7e08dc6f-2641-4cfe-9c29-827a4610d0da/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143550Z&X-Amz-Expires=86400&X-Amz-Signature=24af1dd2db97874dd08b4dec3511aad2b91c44d5fa316dfaf637a0dc633bdbee&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_19.png)
 
 - 내가 아닌 누군가 `memberDAO.find(id)`메서드를 짰을때 어떻게 짰는지 확인 해 봐야만 `member.getTeam()`, `member.getOrder().getDelivery()` 메서드를 호출할 수 있다.
 
@@ -133,7 +133,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/55381d56-3d8b-43bc-98d7-b5c3e5acd220/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143601Z&X-Amz-Expires=86400&X-Amz-Signature=8b95b73e3c5394f94ec66305105ad0bfec0eb24e2611661a89a3d9361c7748a9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_20.png)
 
 **※ 진정한 의미의 계층 분할이 어렵다.**
 
@@ -143,7 +143,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a1e3862f-b19c-46c2-87d9-9a07600a5ace/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143608Z&X-Amz-Expires=86400&X-Amz-Signature=4d5772719300f54155c5c6cc49e4ea822d736ce06e20bd0b0275726e96f63ad8&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_21.png)
 
 - `memberDAO.getMember(id)`를 실행시 보통 새로운 객체를 만들어 반환하기 때문에 같은 id로 조회를 한다고 해도 데이터는 같아도 인스턴스는 다르게 된다.
 
@@ -151,7 +151,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/38662800-d93e-4b0e-a473-ed90805bb79f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230103%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230103T143616Z&X-Amz-Expires=86400&X-Amz-Signature=0f06a7c99133c9f6f723550323ea6501f9bd0413a9601912be657911bf201663&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_22.png)
 
 - **객체가 컬렉션에 저장되어있다고 가정하고 컬렉션에서 객체를 같은 id로 조회시 데이터도 같고 객체도 같게 된다.**
 - **객체답게 모델링 할수록 매핑 작업만 늘어난다.**
@@ -177,20 +177,20 @@
 
 ## JPA는 애플리케이션과 JDBC 사이에서 동작
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a65d56f2-0732-4c14-9cf8-c10cd88dfbe7/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150908Z&X-Amz-Expires=86400&X-Amz-Signature=6efd4b2fc5f5e7864a91a7a19a6f8d04e045fbadf900d4491dbcd262365bedeb&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_23.png)
 
 - JAVA 애플리케이션에서 DB에 접근하려면 JDBC API를 통해서 접근해야하는데 기존에는 개발자가 직접 JDBC API를 썼다면 JPA가 대신 해준다고 생각하면 된다.
 
 ## JPA 동작 - 저장
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/115b5f88-18a6-4140-bd21-c0d4f232cd06/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150924Z&X-Amz-Expires=86400&X-Amz-Signature=98cf9e8f136bab4be3281ad0d25fcd20d71e92cd1acbc9971b70d8361a05b81a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_24.png)
 
 - MemberDAO에서 JPA에 Member 객체를 저장하는 명령어를 내리면 JPA가 해당 Member 객체를 분석해서 INSERT SQL을 생성하고 JDBC API를 사용하여 DB에 INSERT SQL을 실행한다.
 - 객체와 관계형 데이터베이스의 패러다임을 해결
 
 ## JPA 동작 - 조회
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/1642816f-4e29-418c-b2ca-69c0667eb21a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T150935Z&X-Amz-Expires=86400&X-Amz-Signature=4e8d814788c7166815a58ae37c5f32450d64c4b4031b929ad2f5a4490dea70a9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_25.png)
 
 - MemberDAO에서 JPA에 Member 객체를 조회하는 명령어를 내리면 JPA가 SELECT SQL을 생성하고 JDBC API를 사용하여 DB에 SELECT SQL을 실행하여 결과를 받으면 Member 객체에 맞게 ResultSet 매핑까지 다 해서 Member 객체를 반환해준다.
 - 객체와 관계형 데이터베이스의 패러다임을 해결
@@ -216,13 +216,13 @@
 
 **기존: 필드 변경시 모든 SQL 수정**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/70829e11-7b4b-4e0c-b090-b4540348c691/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151013Z&X-Amz-Expires=86400&X-Amz-Signature=d26bbd71cf0e984cda114aca6217042f690d7710731fbf840602f55cccde49bc&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_26.png)
 
 **JPA: 필드만 추가하면 됨, SQL은 JPA가 처리**
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4b4ad9fb-cee3-4547-be6a-0eeb1e4753c8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151020Z&X-Amz-Expires=86400&X-Amz-Signature=0a8601824770dcce40ed67a2865c058454d5e29732c13930c6bae1cef0ee6b91&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_27.png)
 
 ### JPA와 패러다임의 불일치 해결
 
@@ -235,13 +235,13 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ce9199dc-42ee-4a44-a6a1-47c811bd6af4/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151031Z&X-Amz-Expires=86400&X-Amz-Signature=6d1c70f85c1aee200591b5663604c1d8a5d449860471a254a6b54247846f41cb&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_28.png)
 
 *저장*
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/3d29688b-3f74-45a7-9e29-2a958b580d76/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151043Z&X-Amz-Expires=86400&X-Amz-Signature=1b514f3c26dc740e89af9d2e648989f5e4a337796e1280f8e4f2b89f8aecc9de&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_29.png)
 
 - 기존의 방식이라면 Album 객체를 저장하려면 개발자가 직접 Item 데이터를 Insert하고 Album 데이터를 Insert해야하는데 `jpa.persist(album);`이라는 명령어만 사용하면 JPA가 알아서 처리를 해준다.
 
@@ -249,7 +249,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/492277a6-54eb-4aee-a80f-87f0c2174b77/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151052Z&X-Amz-Expires=86400&X-Amz-Signature=dc59fcc188086d470a75096168cc9f949095d560036cb89cf53d1f42e5997061&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_30.png)
 
 - Album 객체를 조회하려면 Item 테이블도 Join하여 Item 객체도 조회도 조회해야하는데 `jpa.find(Album.class, albumId);`명령어로 JPA가 Select 쿼리를 생성해서 알아서 조회까지 해준다.
 
@@ -257,7 +257,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/231edaf1-39a7-469c-bff1-acda8b99056a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151101Z&X-Amz-Expires=86400&X-Amz-Signature=6dc575438aafbc7be55e5aced7a23445b5241fdbf207fca2dc3a8320be34d61c&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_31.png)
 
 - Member 객체에 Team 객체를 set해주고 `jpa.persist(member);`명령어를 실행해주면 Member 객체와 Team 객체가 DB에 Insert된다.
 - Member 객체를 저장하고 `jpa.find(Member.class, memberId);`명령어로 Member 객체를 조회하면 Member 객체에 Team 객체가 set() 되어있는 Member 객체가 반환이 된다.
@@ -266,7 +266,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0ebe3e14-d3ae-4f11-ae9c-6fdcd6bf1029/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151111Z&X-Amz-Expires=86400&X-Amz-Signature=ae5d2b46b47a3fc5ee445ecc53cdd8b2df01fa76025378474355373346a2f417&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_32.png)
 
 - JPA를 통해 Member 객체를 조회하면 DB에 데이터가 있다는 존재하에 Member 객체의 연관관계에 의해서 `member.getTeam()`, `member.getOrder().getDelivery()`코드를 사용해 객체를 다 꺼낼 수 있다.
 - 지연로딩을 사용
@@ -278,7 +278,7 @@
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/9510445c-e5a9-4e77-af47-d63463a5e606/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151120Z&X-Amz-Expires=86400&X-Amz-Signature=8033be793cd9478321a040be92eabbbd4a926d00e56c5c14dab9644d698b193e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_33.png)
 
 - jpa를 통해 데이터를 가져왔을때 같은 데이터를 조회하게 되면 두 객체는 동일한 객체이다.
     - 단 같은 트랜잭션에서 조회한 객체만 보장해줌.
@@ -298,7 +298,7 @@
 1. 같은 트랜잭션 안에서는 같은 엔티티를 반환 - 약간의 조회 성능 향상
 2. DB Isolation Level이 Read Commit이어도 애플리케이션에서 Repeatable Read 보장
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a25a6e60-62c8-439d-9330-dbb4d4e3d18d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151129Z&X-Amz-Expires=86400&X-Amz-Signature=09b82e9be9d63dad2af5f3623ecb383199ac5d8b73439a9862e0fd965020ec1b&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_34.png)
 
 1. `jpa.find(Member.class, memberId);`가 처음 실행 될 때는 SQL을 실행하여 데이터를 가져온 후 메모리에 해당 객체를 올려놓는다.
 2. 같은 트랜잭션 상에서 이전에 실행한 memberId로 `jpa.find(Member.class, memberId);`메소드가 호출 시 JPA가 SQL을 실행하지 않고 메모리에 올려놓은 객체를 반환하게 되면서 SQL을 1번만 실행하게 된다.
@@ -375,7 +375,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 1. 트랜잭션을 커밋하기 전까지 버퍼 메모리에 INSERT SQL을 모음
 2. JDBC BATCH SQL 기능을 사용하여 트랜잭션을 커밋하기 전에 INSERT SQL을 한번에 전송
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/feb2a513-a628-4d76-b482-97669e4d27ea/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151149Z&X-Amz-Expires=86400&X-Amz-Signature=6855e9ae2dc959dd0db8ef88c1daa41f466d13922892d56efd277774d1d0996a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_35.png)
 
 *지연 로딩과 즉시 로딩*
 
@@ -384,7 +384,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 - 지연 로딩: 객체가 실제 사용될 때 로딩
 - 즉시 로딩: JOIN SQL로 한번에 연관된 객체까지 미리 조
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2a4d2c86-ec16-4ede-9071-9aea0145093d/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230104%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230104T151201Z&X-Amz-Expires=86400&X-Amz-Signature=1b3fb07c2567529dc6b00415ee662311ba157af3bae58c3aa0d0e3bf0e46270f&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_36.png)
 
 - Member 객체를 사용하면서 Team 객체를 자주 사용안하면 지연 로딩으로 설정을 해줄 수 있게 제공하여 최적화를 가능하게 해준다.
 
@@ -404,7 +404,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 
 *Maven Project 생성*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/5de5875a-a12e-459c-9953-d514437457dc/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143104Z&X-Amz-Expires=86400&X-Amz-Signature=ecb29790bfdc5e516ee1baf19c4c67a2a56de57265a64b32e0ae6c8a98f5627e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_37.png)
 
 **라이브러리 추가 - pom.xml**
 
@@ -496,7 +496,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 - 페이징 : MySQL은 LIMIT, Oracle은 ROWNUM
 - 방언 : SQL 표준을 지키지 않는 특정 데이터베이스만 고유한 기능
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/937ed801-8c67-46a8-b36b-d295807f5b08/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143128Z&X-Amz-Expires=86400&X-Amz-Signature=22b9a98c7d2afb075c1d1bb31fd5522dd789b5311d74a51eb78e28b30794025a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_38.png)
 
 ## Hello JPA - 애플리케이션 개발
 
@@ -504,7 +504,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 
 ---
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c690d6a7-f92f-4420-a07c-e7b0f11d6660/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143138Z&X-Amz-Expires=86400&X-Amz-Signature=982accaea577da654833d37bbd80948518a56b56055f5f276f7a9ee16ac62b10&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_39.png)
 
 1. 먼저 Persistence가 persistence.xml에 설정 정보를 읽는다.
 2. Persistence.xml을 읽어서 EntityManagerFactory를 만든다.
@@ -596,7 +596,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/dffbe2ca-5226-4b2d-9ce9-38e5c1469aaa/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143202Z&X-Amz-Expires=86400&X-Amz-Signature=8c4859e797c52258e47c0698ef94deb06a68e7eb3136535f38391c310911f0c4&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_40.png)
 
 - 실행을 해보면 이렇게 실행된 쿼리가 로그에 찍힌다.
 - 실행된 쿼리가 로그에 표시된 이유는 `persistence.xml`에서 hibernate속성들을 설정해줬기 때문이다.
@@ -607,7 +607,7 @@ public class JpaMain {
   - `<property name="hibernate.use_sql_comments" value="true"/>`
     - 쿼리 앞에 주석으로 쿼리가 왜 출력됐는지 코멘트를 남겨줌
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/8ac3172f-f159-4e72-b727-de62a3e4b31f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143214Z&X-Amz-Expires=86400&X-Amz-Signature=44e309a58d3d155322c807ea49a4a19d87827265fbd1cbdd8f5ed0b9e7f965d2&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_41.png)
 
 - h2 콘솔에서 조회 쿼리를 실행해보면 데이터가 조회되는게 확인됨.
 
@@ -656,7 +656,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/e329c33d-f368-409d-be78-59ec79d2d044/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143228Z&X-Amz-Expires=86400&X-Amz-Signature=d4d4485a16d2ebace4c1873e09ce4054c35ebcf82c939043e5d50cd0890ffd7e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_42.png)
 
 **회원 삭제**
 
@@ -737,7 +737,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/a0bfac9f-9676-4929-b5aa-3d4f973802d2/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143243Z&X-Amz-Expires=86400&X-Amz-Signature=982c95a950f18f7bff80ff8e4c7b50b4c54b7fe6ced055a6d239b9b6c10e3bb7&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_43.png)
 
 find()한 Member객체의 name값을 변경만 해주었는데 Update 쿼리가 실행된게 확인된다.
 
@@ -814,7 +814,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0e43ca90-fefe-4e9b-921c-4b80a44bef10/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143258Z&X-Amz-Expires=86400&X-Amz-Signature=6c7250776e3efe844dc95ddce7f40529dca11cf660b9db175e8aea59debb66ce&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_44.png)
 
 *페이징 조회*
 
@@ -865,7 +865,7 @@ public class JpaMain {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/c858b91e-384a-46fa-aa50-691945e1efda/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230105%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230105T143314Z&X-Amz-Expires=86400&X-Amz-Signature=12ddaa9ce2f8711620fb3089a8a60cb672090567dee1bdcbd097abf349ec1b98&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_45.png)
 
 **JPQL**
 
@@ -894,7 +894,7 @@ public class JpaMain {
 
 **엔티티 매니저 팩토리와 엔티티 매니저**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/96c871c0-f7de-41f3-a46a-077706ec7e1a/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131012Z&X-Amz-Expires=86400&X-Amz-Signature=ba8fca401ed1246ce0ab26abfb43b77ec7253d94587d1899086f9653c7101a55&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_46.png)
 
 - 웹 어플리케이션의 서버에 고객의 요청이 들어오면 `EntityManagerFactory`에서 `EntityManager` 객체를 생성해준다. 또 새로운 고객의 요청이 들어오면 `EntityManagerFactory`에서 또 다른 `EntityManager`객체를 생성해준다.
 
@@ -915,7 +915,7 @@ public class JpaMain {
 
 **J2SE 환경**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/cd3efce6-f21a-4aab-8fd1-6bf3417849c3/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131035Z&X-Amz-Expires=86400&X-Amz-Signature=188ba8fb25f08cf37fc07c5b2000f85f1a2ae8f2499e6d9e62de02b9e18539ee&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_47.png)
 
 - 엔티티 매니저 안에 영속성 컨텍스트라는 눈에 보이지 않는 공간이 생긴다고 생각하면 된다.
 
@@ -939,13 +939,13 @@ public class JpaMain {
   **삭제**된 상태
 
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4240bfea-2c3c-4bb3-9d1e-4260f7e882a7/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131101Z&X-Amz-Expires=86400&X-Amz-Signature=f382478d346e51f30ba05d1e5c02891ec01bbb5da06834a39952ad830e43afd8&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_48.png)
 
 ---
 
 **비영속**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/1562ea2c-a367-4f9e-bb29-4aabf04e6ac5/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131112Z&X-Amz-Expires=86400&X-Amz-Signature=9037a1457f2d3c6975829e4e1c0c19ef2c86ea1e9cc6f53b831c0f8f5ab845f0&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_49.png)
 
 ```java
 //객체를 생성한 상태(비영속)
@@ -956,7 +956,7 @@ member.setUsername("회원1");
 
 **영속**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d94557ed-ccff-4e4c-96f5-4eb99a033f40/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131122Z&X-Amz-Expires=86400&X-Amz-Signature=5da27ce360a2974bf5fd97ccb8681ff189b9e80b40cc02118f4b9042e79cca8c&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_50.png)
 
 ```java
 //객체를 생성한 상태(비영속)
@@ -992,7 +992,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/6356a498-3a68-4f0d-97c1-7b205dbbb0d8/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131138Z&X-Amz-Expires=86400&X-Amz-Signature=0870ae0ff7261ffeede3f16afeee4e904a2028198d49f5b9ecf8ef154ad043c9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_51.png)
 
 - Insert 쿼리가 ‘=== AFTER ===’ 로그가 찍히고 실행되는게 확인이 된다.
   - **Insert 쿼리는 `tx.commit();`이 명령어가 실행되면서 트랜잭션이 커밋되기 직전에 Insert 쿼리가 실행이 된다.**
@@ -1026,7 +1026,7 @@ em.remove(member);
 
 **엔티티 조회, 1차 캐시**
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/2b4efecc-a62d-4083-8bb3-2b087ac8702f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131151Z&X-Amz-Expires=86400&X-Amz-Signature=7d1a1a47a88ef8df36232e760f9a9194575c83eab583d44721e7eee498048b18&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_52.png)
 
 ```java
 //엔티티를 생성한 상태(비영속)
@@ -1055,7 +1055,7 @@ em.persist(member);
 Member findMember = em.find(Member.class, "member1");
 ```
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/26c9bd60-0c44-4832-b6d9-2aa1d40019d4/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131207Z&X-Amz-Expires=86400&X-Amz-Signature=c9c6c5e72bfea22c5d9e3ba90ba9a6a0802781f5ae521a38140cc7ae21c80b76&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_53.png)
 
 - `member`객체를 영속성 컨텍스트 즉 1차 캐시에 저장이 되면 `em.find(Member.class, "member1");`명령어 실행시 먼저 1차 캐시에 저장된 객체를 조회한다.
 
@@ -1063,7 +1063,7 @@ Member findMember = em.find(Member.class, "member1");
 
 `Member findMember2 = em.find(Member.class, "member2");`
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f50d68c3-5be3-4789-8a5e-2c5d139612e0/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131218Z&X-Amz-Expires=86400&X-Amz-Signature=b8061f15a980d5cf201836b2cad1c5f5d34af4b362bfdaa157a7c86ecc59a1f9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_54.png)
 
 1. `em.find(Member.class, "member2");`명령어가 실행이 되면 member2 객체를 먼저 1차 캐시에서 조회를 하게 된다.
 2. 1차 캐시에서 조회가 안되기 때문에 결국에는 SELECT SQL을 생성해 DB에 접근해 member2 객체를 조회한다.
@@ -1097,7 +1097,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/60a1d574-c0eb-44f1-8c58-25cdb17667e3/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131231Z&X-Amz-Expires=86400&X-Amz-Signature=96eb4850538829c4da5d50930bb0bcd69f7d191f75532710f7dbe93316cbc83a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_55.png)
 
 - 분명히 `em.find(Member.class, 101L);`명령어를 실행했는데 SELECT SQL 로그가 찍히지 않았다.
   → `em.find(Member.class, 101L);`를 하기 앞서 `em.persist(member);`가 먼저 실행이 되서 member 객체가 1차 캐시에 올라가서 `em.find(Member.class, 101L);`가 실행될 때 SQL문으로 DB에 접근하지 않고 1차 캐시에서 key값이 ‘101L’인 member 객체를 조회해서 값을 받게 된다.
@@ -1133,12 +1133,12 @@ transaction.commit(); // [트랜잭션] 커밋
 
 *동작 그림*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/424a43c7-18b1-4640-9e7a-2d8071bd25ee/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131247Z&X-Amz-Expires=86400&X-Amz-Signature=ad6f30c84aa22bfbbf931b0b98129041a1182faaf0ed29efc576a13bcba1f5b0&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_56.png)
 
 - `em.persist(memberA);`명령어가 실행이 되면 영속성 컨텍스트의 1차 캐시에 memberA 객체가 저장되고 동시에 memberA 객체를 분석해 Insert SQL을 생성해 쓰기 지연 SQL 저장소에 저장을 한다.
 - `em.persist(memberB);`명령어도 마찬가지로 memberB 객체가 1차 캐시에 저장되고 Insert SQL을 생성해서 쓰기 지연 SQL 저장소에 차곡차곡 쌓게 된다.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0f6527f0-1a2a-4562-a759-d4ab65f0005c/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131258Z&X-Amz-Expires=86400&X-Amz-Signature=5a81f8e052e383570b58356329cf593392425c3544b5a5b15ff6c5cd7fe9cf8b&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_57.png)
 
 - `transaction.commit();`명령어가 실행되면 데이터베이스를 커밋하기 직전에
   `**flush`명령어를 날려서 쓰기 지연 SQL 저장소에 저장되있던 SQL 문들을 실행해주고 데이터베이스가 커밋이 된다.**
@@ -1160,7 +1160,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/b58726ce-662b-48fd-b5ce-734409244192/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131311Z&X-Amz-Expires=86400&X-Amz-Signature=3edb9e185d476f2c2424ad6979d8860e9872db47faa668713bc26576f9711e33&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_58.png)
 
 - “===========================” 로그가 찍히고 Insert 쿼리 2개가 로그에 찍힌게 확인이 된다.
 
@@ -1191,7 +1191,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/d5a4f0c9-a5c6-4dda-937c-7465e9169c04/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131326Z&X-Amz-Expires=86400&X-Amz-Signature=b43c1c004d7e00e296272c5d8576c5b535dc7b6bacdb5ce65ebd9a09edc346e1&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_59.png)
 
 - member 객체를 조회하는 SELECT 쿼리가 실행이되고 member 객체의 UPDATE 쿼리가 실행이 된다.
 - 코드를 보면 `em.update();`라는 명령어가 실행되어야 할 것 같지만 이런 메소드는 없다.
@@ -1199,7 +1199,7 @@ tx.commit();
 
 *변경 감지 - 동작 방식 그림*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/f54fe2a5-e390-4dbc-97ad-507dcbde5eba/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230106%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230106T131337Z&X-Amz-Expires=86400&X-Amz-Signature=3e9f06344e6c5b31e97a8c3dfb463f2c56eeeb25b705973c69f9a0159fe52160&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_60.png)
 
 - JPA는 엔티티를 영속성 컨텍스트에 보관할 때, 최초 상태를 복사해서 저장해두는데 이것을 스냅샷이라 한다.
 - 플러시 시전에 스냅샷과 엔티티를 비교해서 변경된 엔티티를 찾는다.
@@ -1408,7 +1408,7 @@ List<Order> orders= query.getResultList();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/0423eb47-f02f-4890-a29c-55428aca54bd/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230108%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230108T085427Z&X-Amz-Expires=86400&X-Amz-Signature=a0e53906d2144085750860caa4901170d8b0cc9498a5fb61ab721bb8e7601c5a&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_61.png)
 
 - Member 테이블을 DROP하고 CREATE 한다.
 
@@ -1557,7 +1557,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/fd1ff061-b9fd-4bac-ba2a-1f809eae64da/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140123Z&X-Amz-Expires=86400&X-Amz-Signature=5150041234223c3fa59a54adfed055bd78c8aedc0a2d9f072b3595a8e89ff95b&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_62.png)
 
 - ROLETYPE 컬럼에 0이 들어간게 확인된다. (순서로 적재 확인)
 
@@ -1585,7 +1585,7 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/88a64bd8-5256-4d4a-9cb5-5004b564c49b/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140141Z&X-Amz-Expires=86400&X-Amz-Signature=f462901eb4e1a3d975160a27f601d55004b93a565f3dde03061afde1945a89ee&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_63.png)
 
 - ID값이 2인 행의 ROLETYPE 값도 0인걸 확인할 수 있다.
 - 이런 문제점이 발생하기 때문에 `@Enumerated(EnumType.*STRING*)`이렇게 속성값을 사용해야 한다.
@@ -1700,11 +1700,11 @@ tx.commit();
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/3a8873ff-959f-4219-8fd2-185cf0d72b4f/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140215Z&X-Amz-Expires=86400&X-Amz-Signature=9a4ea1400d38efd5dab5c29a94ed3039fc3ac8cfc6b810f61805a2acc82aa3d9&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_64.png)
 
 - hibernate_sequence 에서 다음 시퀀스를 호출하는 쿼리문에 확인된다.
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/4cd3621e-d8ed-4431-9206-bad00b59f499/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140225Z&X-Amz-Expires=86400&X-Amz-Signature=9aadc9308ce2ef4eb84e21a963ab230ae737ae6e75787932f316779326a1d8ea&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_65.png)
 
 **SEQUENCE 전략 - 특징**
 
@@ -1749,7 +1749,7 @@ public class Member {
 
 *실행 (*`<property name="hibernate.hbm2ddl.auto" value="create"/>`)
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/ea7b4412-782b-4ed0-80c1-aa9630fc332b/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140246Z&X-Amz-Expires=86400&X-Amz-Signature=900367d63e961c0d3a024700d20605401ab90313ea0d0ec0c19efbc533b693de&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_66.png)
 
 - DDL 생성 기능에서 시퀀스를 생성하고 Member 테이블을 생성하는게 확인된다.
 - 생성된 시퀀스를 호출하여 INSERT SQL을 실행함
@@ -1802,11 +1802,11 @@ public class Member {
 
 *실행*
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/69232aea-b499-48d3-84a3-213d0b2d4e64/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140308Z&X-Amz-Expires=86400&X-Amz-Signature=0b3470c9fcb9f2a7182bbef16dde1b252a739d8ffd1e8eec42ae6799534674ec&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_67.png)
 
 - MY_SEQUENCES라는 테이블을 생성하고 초기화값으로 0을 INSERT 해줌
 
-![Untitled](https://s3.us-west-2.amazonaws.com/secure.notion-static.com/9640ba6a-3fb5-4e86-a0b5-d3dc614e4f82/Untitled.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAT73L2G45EIPT3X45%2F20230109%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20230109T140318Z&X-Amz-Expires=86400&X-Amz-Signature=3de8cfbdad0e9baa92bbd4334a89355115a3dad4c49399a2cc9aadd3fd4de59e&X-Amz-SignedHeaders=host&response-content-disposition=filename%3D%22Untitled.png%22&x-id=GetObject)
+![](img/img_68.png)
 
 - MY_SEQUENCES 테이블에서 다음 시퀀스 값을 조회하고 UPDATE 하는 SQL이 실행됨
 
