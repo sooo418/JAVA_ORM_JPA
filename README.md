@@ -251,7 +251,7 @@
 
 ![](img/img_30.png)
 
-- Album 객체를 조회하려면 Item 테이블도 Join하여 Item 객체도 조회도 조회해야하는데 `jpa.find(Album.class, albumId);`명령어로 JPA가 Select 쿼리를 생성해서 알아서 조회까지 해준다.
+- Album 객체를 조회하려면 Item 테이블도 Join하여 Item 객체도 조회해야 하는데 `jpa.find(Album.class, albumId);`명령어로 JPA가 Select 쿼리를 생성해서 알아서 조회까지 해준다.
 
 **JPA와 연관관계, 객체 그래프 탐색**
 
