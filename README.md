@@ -397,7 +397,7 @@ InnoDB에서는 기본적인 SELECT 쿼리에 잠금을 걸지 않고 실행하�
 
 - java 8 이상 (8 권장)
   - 11 사용
-- 메이블 설정
+- 메이븐 설정
   - groupId : jpa-basic
   - artifactId : ex1-hello-jpa
   - version : 1.0.0
@@ -1017,7 +1017,7 @@ em.remove(member);
 
 - 1차 캐시
 - 동일성(identity) 보장
-- 트랜잭셕을 지원하는 쓰기 지원
+- 트랜잭션을 지원하는 쓰기 지원
   (transactional write-behind)
 - 변경 감지
   (Dirty Checking)
@@ -1071,7 +1071,7 @@ Member findMember = em.find(Member.class, "member1");
 4. 1차 캐시에 저장된 member2 객체를 반환한다.
 
 > 참고: 영속성 컨텍스트의 1차 캐시의 성능의 이점은 굉장히 미미하다.
-→ 트랜잭션이 끝나면 1차 캐시도 날라가기 때문에 사실상 같은 트랜잭션상에서 같은 데이터를 조회하는 상황 자주 일어나지 않는다.
+→ 트랜잭션이 끝나면 1차 캐시도 날라가기 때문에 사실상 같은 트랜잭션상에서 같은 데이터를 조회하는 상황이 자주 일어나지 않는다.
 >
 
 *1차 캐시 확인해보기*
@@ -1248,7 +1248,7 @@ List<Member> members= query.getResultList();
 ```
 
 - JPQL을 실행되지 전에 memberA, memberB, memberC 객체들은 DB에 Insert 쿼리가 실행되지 않았기 때문에 DB에 저장된 데이터들이 아니다.
-- **이때 JPQL일 실행되면 JPQL은 SQL로 변역이 되어 DB에 실행**되기 때문에 memberA, memberB, memberC 객체는 조회가 안되게 된다.
+- **이때 JPQL이 실행되면 JPQL은 SQL로 변역이 되어 DB에 실행**되기 때문에 memberA, memberB, memberC 객체는 조회가 안되게 된다.
 - 이런 현상을 방지하고자 JPQL 쿼리가 실행되면 SQL을 실행하기 전에 무조건 플러시를 호출하게 된다.
 
 **플러시 모드 옵션**
