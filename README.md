@@ -1953,7 +1953,7 @@ Team findTeam = em.find(Team.class, team.getId());
 - **객체는 참조**를 사용해서 연관된 객체를 찾는다.
 - 테이블과 객체 사이에는 이런 큰 간격이 있다.
 
-## 단방계
+## 단방향 연관관계
 
 **객체 지향 모델링(객체 연관관계 사용)**
 
@@ -2417,3 +2417,199 @@ public void addMember(Member member) {
 - `@JoinColumn(insertable=false, updatable = false)`
 - **읽기 전용 필드**를 사용해서 양방향 처럼 사용하는 방법
 - **다대일 양방향을 사용하자**
+
+# 리뷰 완료
+
+## 일대일[1:1]
+
+**일대일 관계**
+
+---
+
+- 일대일 관계는 그 반대도 일대일
+- 주 테이블이나 대상 테이블 중에 외래키 선택 가능
+  - 주 테이블에 외래 키
+  - 대상 테이블에 외래 키
+- 외래 키에 데이터베이스 유니크(UNI) 제약조건 추가
+
+**일대일: 주 테이블에 외래 키 단방향**
+
+---
+
+![](img/img_74.png)
+
+- 외래 키를 Member테이블이 가지고 있지만 Locker 테이블이 가지고 있어도 무방하다.
+  - 누가 주인이 되어도 문제가 없음
+
+**일대일: 주 테이블에 외래 키 단방향 정리**
+
+---
+
+- 다대일(`@ManyToOne`) 단방향 매핑과 유사
+
+**일대일: 주 테이블에 외래 키 양방향**
+
+---
+
+![](img/img_75.png)
+
+- `Locker` 객체에 `Member` 객체를 추가해주면 된다.
+
+**일대일: 주 테이블에 외래 키 양방향 정리**
+
+---
+
+- 다대일 양방향 매핑처럼 **외래 키가 있는 곳이 연관관계의 주인**
+- 반대편은 mappedBy 적용
+
+**일대일: 대상 테이블에 외래 키 단방향**
+
+---
+
+![](img/img_76.png)
+
+**일대일: 대상 테이블에 외래 키 단방향 정리**
+
+---
+
+- **단방향 관계는 JPA 지원 X**
+- 양방향 관계는 지원
+
+**일대일: 대상 테이블에 외래 키 양방향**
+
+---
+
+![](img/img_77.png)
+
+- `Locker` 객체에 있는 `Member` 객체를 주인으로 지정하면 된다. **(살짝 어폐가 있음.)**
+  - 그냥 위에 **주 테이블에 외래 키 양방향**를 반대로 뒤집은 것과 같다.
+
+**일대일: 대상 테이블에 외래 키 양방향**
+
+---
+
+- 사실 일대일 주 테이블에 외래 키 양방향과 매핑 방법은 같음
+
+### 일대일 정리
+
+- **주 테이블에 외래 키**
+  - 주 객체가 대상 객체의 참조를 가지는 것 처럼
+    주 테이블에 외래 키를 두고 대상 테이블을 찾음
+  - 객체지향 개발자 선호
+  - JPA 매핑 편리
+  - 장점: 주 테이블만 조회해도 대상 테이블에 데이터가 있는지 확인 가능
+  - 단점: 값이 없으면 외래 키에 null 허용
+- **대상 테이블에 외래 키**
+  - 대상 테이블에 외래 키가 존재
+  - 전ㅌ오적인 데이터베이스 개발자 선호
+  - 장점: 주 테이블과 대상 테이블을 일대일에서 일대다 관계로 변경할 때 테이블 구조 유지
+  - 단점: 프록시 기능의 한계로 **지연 로딩으로 설정해도 항상 즉시 로딩됨**(프록시는 뒤에서 설명)
+
+
+## 다대다[N:M]
+
+**다대다(관계형 데이터베이스)**
+
+---
+
+- 관계형 데이터베이스는 정규화된 테이블을 2개로 다대다 관계를 표현할 수 없음
+- 연결 테이블을 추가해서 일대다, 다대일 관계로 풀어내야
+
+![](img/img_78.png)
+
+**다대다(객체)**
+
+---
+
+- 객체는 컬렉션을 사용해서 객체 2개로 다대다 관계 가능
+
+![](img/img_79.png)
+
+**다대다**
+
+---
+
+- `@ManyToMany`사용
+- `@JoinTable`로 연결 테이블 지정
+- 다대다 매핑: 단방향, 양방향 가능
+
+**다대다 매핑의 한계**
+
+---
+
+- **편리해 보이지만 실무에서 사용X**
+- 연결 테이블이 단순히 연결만 하고 끝나지 않음
+- 주문시간, 수량 같은 데이터가 들어올 수 있음
+
+![](img/img_80.png)
+
+**다대다 한계 극복**
+
+---
+
+- **연결 테이블용 엩니니 추가(연결 테이블을 엔티티로 승격)**
+- `@ManyToMany` → `@OneToMany`, `@ManyToOne`
+
+![](img/img_81.png)
+
+*Member*
+
+```java
+@Entity
+public class Member {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberProduct> memberProducts = new ArrayList<>();
+
+    //Getter, Setter...
+}
+```
+
+*Product*
+
+```java
+@Entity
+public class Product {
+
+		@Id @GeneratedValue
+		private Long id;
+		
+		private String name;
+		
+		@OneToMany(mappedBy = "product")
+		private List<MemberProduct> memberProducts = new ArrayList<>();
+
+		//Getter, Setter...
+}
+```
+
+*MemberProduct*
+
+```java
+@Entity
+public class MemberProduct {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
+    @ManyToOne
+    @JoinColumn(name = "PRODUCT_ID")
+    private Product product;
+
+    private int count;
+    private int price;
+
+    private LocalDateTime orderDateTime;
+}
+```
