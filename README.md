@@ -2667,7 +2667,7 @@ public abstract class Item {
     private String name;
     private int price;
 
-		//Getter, Setter...
+    //Getter, Setter...
 }
 ```
 
@@ -2678,7 +2678,7 @@ public abstract class Item {
 public class Album extends Item {
     private String artist;
 
-		//Getter, Setter...
+    //Getter, Setter...
 }
 ```
 
@@ -2690,7 +2690,7 @@ public class Movie extends Item {
     private String director;
     private String actor;
 
-		//Getter, Setter...
+    //Getter, Setter...
 }
 ```
 
@@ -2702,7 +2702,7 @@ public class Book extends Item {
     private String author;
     private String isbn;
 
-		//Getter, Setter...
+    //Getter, Setter...
 }
 ```
 
@@ -2730,7 +2730,7 @@ public abstract class Item {
     private String name;
     private int price;
 
-		//Getter, Setter...
+    //Getter, Setter...
 }
 ```
 
@@ -2921,7 +2921,7 @@ public abstract class Item {
 
 ---
 
-- 구현 클래스마다 테이블 전략은 INSERT, SELECT SQL 성능도 좋아보이지만 큰 단점이 존재한다.
+- 구현 클래스마다 테이블 전략은 INSERT, SELECT SQL 성능이 좋아보이지만 큰 단점이 존재한다.
 
 *JpaMain*
 
@@ -3021,7 +3021,7 @@ where
 - 상속관계 매핑X
 - 엔티티X, 테이블과 매핑X
 - 부모 클래스를 상속 받는 **자식 클래스에 매핑 정보만 제공**
-- 조회, 검색 불가(**em.fnid(BaseEntity)** 불가)
+- 조회, 검색 불가(**em.find(BaseEntity)** 불가)
 - 직접 생성해서 사용할 일이 없으므로 **추상 클래스 권장**
 - 테이블과 관계 없고, 단순히 엔티티가 공통으로 사용하는 매핑 정보를 모으는 역할
 - 주로 등록일, 수정일, 등록자, 수정자 같은 전체 엔티티에서 공통으로 적용하는 정보를 모을 때 사용
