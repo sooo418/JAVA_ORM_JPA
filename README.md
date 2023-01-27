@@ -2613,3 +2613,512 @@ public class MemberProduct {
     private LocalDateTime orderDateTime;
 }
 ```
+
+# 고급 매핑
+
+**목차**
+
+---
+
+- 상속관계 매핑
+- `@MappedSuperclass`
+- 실전 예제 - 4. 상속관계 매핑
+
+## 상속관계 매핑
+
+- 관계형 데이터베이스 상속관계X
+- 슈퍼타입 서브타입 관계라는 모델링 기법이 객체 상속과 유사
+- 상속관계 매핑: 객체의 상속과 구조와 DB의 슈퍼타입 서브타입 관계를 매핑
+
+![](img/img_82.png)
+
+- 슈퍼타입 서브타입 논리 모델을 실제 물리 모델로 구현하는 방법
+  - 각각 테이블로 변환 → 조인 전략
+  - 통합 테이블로 변환 → 단일 테이블 전략
+  - 서브타입 테이블로 변환 → 구현 클래스마다 테이블 전략
+
+**주요 어노테이션**
+
+---
+
+- `@Inheritance(strategy=InheritanceType.XXX)`
+  - **JOINED**: 조인 전략
+  - **SINGLE_TABLE**: 단일 테이블 전략
+  - **TABLE_PER_CLASS**: 구현 클래스마다 테이블 전략
+- `@DiscriminatorColumn(name="DTYPE")`
+  - DTYPE 의 컬럼명을 변경하고 싶다면 `name`속성안에 원하는 컬럼명을 정의해주면 된다.
+- `@DiscriminatorValue("XXX")`
+  - DTYPE 의 들어갈 값을 변경하고 싶다면 XXX에 원하는 값을 정의해주면 된다.
+  - 기본값은 Entity의 값이 들어간다.
+
+**기본 전략 확인해보기**
+
+---
+
+*Item*
+
+```java
+@Entity
+public abstract class Item {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+    private int price;
+
+		//Getter, Setter...
+}
+```
+
+*Album*
+
+```java
+@Entity
+public class Album extends Item {
+    private String artist;
+
+		//Getter, Setter...
+}
+```
+
+*Movie*
+
+```java
+@Entity
+public class Movie extends Item {
+    private String director;
+    private String actor;
+
+		//Getter, Setter...
+}
+```
+
+*Book*
+
+```java
+@Entity
+public class Book extends Item {
+    private String author;
+    private String isbn;
+
+		//Getter, Setter...
+}
+```
+
+*실행*
+
+![](img/img_83.png)
+
+- 기본 전략은 단일 테이블 전략인걸 알 수 있다.
+
+### 조인 전략
+
+![](img/img_84.png)
+
+*Item*
+
+```java
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn
+public abstract class Item {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+    private int price;
+
+		//Getter, Setter...
+}
+```
+
+- `**Item`객체에만 `@Inheritance(strategy = InheritanceType.JOINED)`추가**
+- `**@DiscriminatorColumn`을 추가해서 DTYPE 컬럼 추가 (※ 조인 전략 사용시 사용 권장)**
+
+*JpaMain*
+
+```java
+Movie movie = new Movie();
+movie.setDirector("aaaa");
+movie.setActor("bbbb");
+movie.setName("바람과함께사라지다");
+movie.setPrice(10000);
+
+em.persist(movie);
+
+em.flush();
+em.clear();
+
+Movie findMovie = em.find(Movie.class, movie.getId());
+
+tx.commit();
+```
+
+*실행 - 테이블 생성*
+
+![](img/img_85.png)
+
+![](img/img_86.png)
+
+- 조인 전략의 테이블 구조와 같게 테이블이 생성된다.
+
+*실행 - 삽입*
+
+![](img/img_87.png)
+
+- INSERT SQL이 2번 호출됨
+
+*실행 - 조회*
+
+![](img/img_88.png)
+
+- SELECT SQL도 JOIN을 해서 조회
+
+*데이터 확인*
+
+![](img/img_89.png)
+
+- `ITEM`테이블 DTYPE 컬럼에 Movie가 들어감
+- `ITEM`테이블의 ID와 `MOVIE`테이블의 ID값이 똑같이 1인걸 확인할 수 있다.
+
+**조인 전략 정리**
+
+---
+
+- 장점
+  - 테이블 정규화
+    - ALBUM, MOVIE, BOOK 테이블에서 NAME, PRICE를 중복적으로 사용하지않고 ITEM 테이블과 JOIN을해서 가져올 수 있음
+  - 외래 키 참조 무결성 제약조건 활용 가능
+    - 외래 키를 사용
+    - 참조 관계에 있어 두 테이블의 데이터가 항상 일관된 값을 갖는다.
+  - 저장공간 효율화
+- 단점
+  - 조회시 조인을 많이 사용, 성능 저하
+  - 조회 쿼리가 복잡함
+  - 데이터 저장시 INSERT SQL 2번 호출
+
+## 단일 테이블 전략
+
+![](img/img_90.png)
+
+*Item*
+
+```java
+@Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn
+public abstract class Item {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+    private int price;
+
+    //Getter, Setter...
+}
+```
+
+- `@Inheritance(strategy = InheritanceType.JOINED)`
+  → `@Inheritance(strategy = InheritanceType.SINGLE_TABLE)`
+- **JOINED** 만 **SINGLE_TABLE** 로 변경
+  - **JPA의 큰 장점**
+  - **Entity 변경없이 InheritanceType만 변경해주면 전략을 변경할 수 있다.**
+
+*실행 - 테이블 생성*
+
+![](img/img_91.png)
+
+- **기본값처럼 `ITEM`테이블 컬럼들이 다 포함된다.**
+- **※ 조인 전략은 `@DiscriminatorColumn`을 추가해주어야만 DTYPE 컬럼이 추가되는데
+  단일 테이블 전략은 위에 기본값 전략을 확인해보면 `@DiscriminatorColumn`이 없이도 DTYPE 컬럼이 추가된걸 확인할 수 있다.**
+  - 조인 전략에서는 DTYPE 컬럼이 없어도 `ITEM`데이터가 `ALBUM`, `MOVIE`, `BOOK`데이터 중 어떤 데이터인지 알 수 있지만 단일 테이블 전략에선 DTYPE 컬럼이 없으면 어떤 데이터인지 알 수 가 없다.
+  - 즉 단일 테이블 전략에선 DTYPE 컬림이 필수적으로 있어야 한다.
+
+*실행 - 삽입*
+
+![](img/img_92.png)
+
+- INSERT SQL이 1번만 호출
+
+*실행 - 조회*
+
+![](img/img_93.png)
+
+- SELECT SQL도 JOIN없이 호출
+
+*데이터 확인*
+
+![](img/img_94.png)
+
+- 데이터가 없는 값은 null
+
+**단일 테이블 전략 정리**
+
+---
+
+- 장점
+  - 조인이 필요 없으므로 일반적으로 조회 성능이 빠름
+  - 조회 쿼리가 단순함
+- 단점
+  - 자식 엔티티가 매핑한 컬럼은 모두 null 허용
+  - 단일 테이블에 모든 것을 저장하므로 테이블이 커질 수 있다 상황에 따라서 조회 성능이 오히려 느려질 수 있다.
+
+## 구현 클래스마다 테이블 전략
+
+![](img/img_95.png)
+
+- 조인 전략이랑 비슷한데 `ITEM`테이블을 없애고 `ITEM`테이블의 속성들을 각각 내려 받는 전략이다.
+
+*Item*
+
+```java
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public abstract class Item {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+    private int price;
+
+    //Getter, Setter...
+}
+```
+
+- `@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)`
+  - InheritanceType을 `TABLE_PER_CLASS`로 변경
+- `ITEM`테이블은 생성할 필요가 없으므로 자연스레 `@DisciriminatorColumn`도 불필
+
+*실행 - 테이블 생성*
+
+![](img/img_96.png)
+
+![](img/img_97.png)
+
+- `ITEM` 테이블은 미생성
+
+*실행 - 삽입*
+
+![](img/img_98.png)
+
+- `MOVIE` 테이블만 INSERT SQL 실행
+
+*실행 - 조회*
+
+![](img/img_99.png)
+
+- `MOVIE` 테이블에서만 SELECT SQL 실행
+
+*데이터 확인*
+
+![](img/img_100.png)
+
+**구현 클래스마다 테이블 전략의 문제점**
+
+---
+
+- 구현 클래스마다 테이블 전략은 INSERT, SELECT SQL 성능도 좋아보이지만 큰 단점이 존재한다.
+
+*JpaMain*
+
+```java
+Movie movie = new Movie();
+movie.setDirector("aaaa");
+movie.setActor("bbbb");
+movie.setName("바람과함께사라지다");
+movie.setPrice(10000);
+
+em.persist(movie);
+
+em.flush();
+em.clear();
+
+Item findMovie = em.find(Item.class, movie.getId());
+```
+
+*실행*
+
+```sql
+Hibernate: 
+    select
+        item0_.id as id1_2_0_,
+        item0_.name as name2_2_0_,
+        item0_.price as price3_2_0_,
+        item0_.artist as artist1_0_0_,
+        item0_.author as author1_1_0_,
+        item0_.isbn as isbn2_1_0_,
+        item0_.actor as actor1_6_0_,
+        item0_.director as director2_6_0_,
+        item0_.clazz_ as clazz_0_ 
+    from
+        ( select
+            id,
+            name,
+            price,
+            artist,
+            null as author,
+            null as isbn,
+            null as actor,
+            null as director,
+            1 as clazz_ 
+        from
+            Album 
+        union
+        all select
+            id,
+            name,
+            price,
+            null as artist,
+            author,
+            isbn,
+            null as actor,
+            null as director,
+            2 as clazz_ 
+        from
+            Book 
+        union
+        all select
+            id,
+            name,
+            price,
+            null as artist,
+            null as author,
+            null as isbn,
+            actor,
+            director,
+            3 as clazz_ 
+        from
+            Movie 
+    ) item0_ 
+where
+    item0_.id=?
+```
+
+- `Movie` 데이터를 부모 클래스 `Item`엔티티로 조회할 경우 `Item`엔티티를 상속받는 `Album`, `Movie`, `Book` 테이블을 모두 뒤져서 입력받은 id값을 만족하는 데이터를 찾아야 하는 문제가 있다.
+
+**구현 클래스마다 테이블 전략 정리**
+
+---
+
+- **이 전략은 데이터베이스 설계자와 ORM 전문가 둘 다 추천X**
+- 장점
+  - 서브 타입을 명확하게 구분해서 처리할 때 효과적
+  - not null 제약조건 사용 가능
+- 단점
+  - 여러 자식 테이블을 함께 조회할 때 성능이 느림(UNION SQL 필요)
+  - 자식 테이블을 통합해서 쿼리하기 어려움
+
+## @MappedSuperclass
+
+- 공통 매핑 정보가 필요할 때 사용(id, name)
+
+![](img/img_101.png)
+
+- 상속관계 매핑X
+- 엔티티X, 테이블과 매핑X
+- 부모 클래스를 상속 받는 **자식 클래스에 매핑 정보만 제공**
+- 조회, 검색 불가(**em.fnid(BaseEntity)** 불가)
+- 직접 생성해서 사용할 일이 없으므로 **추상 클래스 권장**
+- 테이블과 관계 없고, 단순히 엔티티가 공통으로 사용하는 매핑 정보를 모으는 역할
+- 주로 등록일, 수정일, 등록자, 수정자 같은 전체 엔티티에서 공통으로 적용하는 정보를 모을 때 사용
+- 참고: `@Entity`클래스는 엔티티나 `@MappedSuperclass`로 지정한 클래스만 상속 가능
+  - `@Entity` → 상속관계 매핑
+  - `@MappedSuperclass` → 매핑 정보만 상속
+
+*BaseEntity*
+
+```java
+@MappedSuperclass
+public abstract class BaseEntity {
+
+    @Column(name = "INSERT_MEMBER")
+    private String createBy;
+    private LocalDateTime createdDate;
+    @Column(name = "UPDATE_MEMBER")
+    private String lastModifiedBy;
+    private LocalDateTime lastModifiedDate;
+
+    //Getter, Setter...
+}
+```
+
+- `@Column`속성을 사용해 컬럼명을 정의해줄 수 있다.
+
+*Member*
+
+```java
+@Entity
+public class Member extends BaseEntity {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
+    @OneToOne
+    @JoinColumn(name = "LOCKER_ID")
+    private Locker locker;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberProduct> memberProducts = new ArrayList<>();
+
+    //Getter, Setter...
+}
+```
+
+*Team*
+
+```java
+@Entity
+public class Team extends BaseEntity {
+
+    @Id @GeneratedValue
+    @Column(name = "TEAM_ID")
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "team")
+    private List<Member> members = new ArrayList<>();
+
+    public void addMember(Member member) {
+        this.members.add(member);
+        member.setTeam(this);
+    }
+
+    //Getter, Setter...
+}
+```
+
+- `Member`, `Team` 클래스 모두 `BaseEntity`클래스를 상속만 받음
+
+*JpaMain*
+
+```java
+Member member = new Member();
+member.setUsername("user1");
+member.setCreateBy("kim");
+member.setCreatedDate(LocalDateTime.now());
+
+em.persist(member);
+
+tx.commit();
+```
+
+*실행*
+
+![](img/img_102.png)
+
+![](img/img_103.png)
+
+- `Member`테이블과 `Team`테이블에 공통적으로 `BaseEntity`클래스에 정의한 필드들이 추가된게 확인된다.
