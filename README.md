@@ -3122,3 +3122,229 @@ tx.commit();
 ![](img/img_103.png)
 
 - `Member`테이블과 `Team`테이블에 공통적으로 `BaseEntity`클래스에 정의한 필드들이 추가된게 확인된다.
+
+# 프록시와 연관관계 매핑
+
+**목차**
+
+---
+
+- 프록시
+- 즉시 로딩과 지연 로딩
+- 지연 로딩 활용
+- 영속성 전이: CASCADE
+- 고아 객체
+- 영속성 전이 + 고아 객체, 생명주기
+- 실전 예제 - 5. 연관관계 관리
+
+## 프록시
+
+**Member를 조회할 때 Team도 함께 조회해야 할까?**
+
+---
+
+![](img2/img.png)
+
+*회원과 팀 함께 출력*
+
+```java
+public void printMemberAndTeam(String memberId) {
+     Member member = em.find(Member.class, memberId);
+     Team team = member.getTeam();
+     System.out.println("회원 이름: " + member.getUsername());
+     System.out.println("소속팀: " + team.getName());
+}
+```
+
+*회원만 출력*
+
+```java
+public void printMember(String memberId) {
+     Member member = em.find(Member.class, memberId);
+     Team team = member.getTeam();
+     System.out.println("회원 이름: " + member.getUsername());
+}
+```
+
+- `printMember()`메소드는 `Member` 엔티티만 사용하므로 `em.find()`로 `Member`  엔티티를 조회 할 때 `Member` 와 연관된 `Team` 엔티티(Member.team)까지 데이터베이스에서 함께 조회해 두는 것은 효율적이지 않다.
+- JPA는 이런 문제를 해결하려고 엔티티가 실제 사용될 때까지 데이터베이스 조회를 지연하는 방법을 제공하는데 이겻을 **지연 로딩**이라 한다. 쉽게 이야기해서 `team.getName()`처럼 `Team` 엔티티의 값을 실제 사용하는 시점에 데이터베이스에서 `Team` 엔티티에 필요한 데이터를 조회하는 것이다.
+- **그런데 지연 로딩 기능을 사용하려면 실제 엔티티 객체 대신에 데이터베이스 조회를 지연할 수 있는 가짜 객체가 필요한데 이것을 프록시 객체라 한다.**
+
+### 프록시 기초
+
+- `em.find()` vs `em.getReference()`
+- `em.find()`: 데이터베이스를 통해서 실제 엔티티 객체 조회
+- `em.getReference()`: **데이터베이스 조회를 미루는 가짜(프록시) 엔티티 객체 조회**
+  - 데이터베이스에 SQL이 실행이 안되는데 객체를 반환함
+
+![](img2/img_1.png)
+
+- Jpa에서 식별자로 엔티티 하나를 조회할 때는 `EntityManager.find()`를 사용한다.
+  **이 메소드는 영속성 컨텍스트에 엔티티가 없으면 데이터베이스를 조회한다.**
+  `Member member = em.find(Member.class, “member1”);`
+- 이렇게 엔티티를 직접 조회하면 조회한 엔티티를 실제 사용하든 사용하지 않든 데이터베이스를 조회하게 된다. 엔티티를 실제 사용하는 시점까지 데이터베이스 조회를 미루고 싶으면 `EntityManager.GetReference()`메소드를 사용하면 된다.
+  `Member member = em.getReference(Member.class, “member1”);`
+- 이 메소드를 호출할 때 JPA는 데이터베이스를 조회하지 않고 실제 엔티티 객체도 생성하지 않는다. 대신에 데이터베이스 접근을 위임한 프록시 객체를 반환한다.
+
+*JpaMain*
+
+```java
+Member member = new Member();
+member.setUsername("hello");
+
+em.persist(member);
+
+em.flush();
+em.clear();
+
+Member findMember = em.getReference(Member.class, member.getId());
+System.out.println("findMember = " + findMember.getClass());
+System.out.println("findMember.id = " + findMember.getId());
+System.out.println("findMember.username = " + findMember.getUsername());
+```
+
+*실행*
+
+![](img2/img_2.png)
+
+1. findMember의 class를 출력시 hibernateProxy~~라고 표시되는걸 보니 하이버네이트에서 지원하는 프록시 객체라는걸 알 수 있다.
+2. findMember의 id값을 출력할 때는 SELECT SQL을 실행하지 않고 값을 출력한다.
+  1. id값은 프록시 객체를 요청할때 인자값으로 보내주고 있다.
+3. findMember의 username값을 출력하려고 하자 값이 없는걸 확인하고 SELECT SQL을 실행시켜 실제 값을 조회한다.
+
+### 프록시 특징
+
+- 실제 클래스를 상속 받아서 만들어짐
+- 실제 클래스와 겉 모양이 같다.
+- 사용하는 입장에는 진짜 객체인지 프록시 객체인지 구분한지 않고 사용하면 됨(이론상)
+
+![](img2/img_3.png)
+
+- 프록시 객체는 실제 객체의 참조(target)를 관
+- 프록시 객체의 메소드를 호출하면 프록시 객체는 실제 객체의 메소드를 호출한다.(프록시 위임)
+
+![](img2/img_4.png)
+
+### 프록시 객체의 초기화
+
+- 프록시 객체는 `member.getname()`처럼 실제 사용될 때 데이터베이스를 조회해서 실제 엔티티 객체를 생성하는데 이것을 프록시 객체의 초기화라 한다.
+
+```java
+//MemberProxy 반환
+Member member = em.getReference(Member.class, "id1");
+member.getName(); //1. getName();
+```
+
+![](img2/img_5.png)
+
+1. 프록시 객체에 `member.getName()`을 호출해서 실제 데이터를 조회한다.
+2. **프록시 객체는 실제 엔티티가 생성되어 있지 않으면 영속성 컨텍스트에 실제 엔티티 생성을 요청하는데 이것을 초기화라 한다.**
+3. 영속성 컨텍스트는 데이터베이스를 조회해서 실제 엔티티 객체를 생성한다.
+4. 프록시 객체는 생성된 실제 엔티티 객체의 참조를 `Member target` 멤버 변수에 보관한다.
+5. 프록시 객체는 실제 엔티티 객체의 `getName()`을 호출해서 결과를 반환한다.
+
+### 프록시의 특징
+
+- 프록시 객체는 처음 사용할 때 한 번만 초기화된다.
+- 프록시 객체를 초기화 할 때, 프록시 객체가 실제 엔티티로 바뀌는 것은 아님, 초기화되면 프록시 객체를 통해서 실제 엔티티에 접근 가능
+- 프록시 객체는 원본 엔티티를 상속받음, 따라서 타입 체크시 주의해야함(== 비교 실패, 대신 instance of 사용)
+
+    ```java
+    Member reference = em.gerReference(Member.class, "id1");
+    
+    System.out.println("reference = Member: " + ( reference instanceof Member ));
+    ```
+
+- 영속성 컨텍스트에 찾는 엔티티가 이미 있으면 `**em.getReference()**`를 호출해도 실제 엔티티 반환
+  - 영속성 컨텍스트에 이미 해당 객체가 있으므로 굳이(성능상에도) 프록시 객체를 만들 필요가 없으므로 실제 엔티티 반환
+  - 영속성 컨텍스트에 이미 등록된 객체를 반환받을 때 같은 Key값의 객체는 항상 같은 객체여야 하기 때문에 실제 엔티티를 반환한다. (1차 캐시)
+
+    *JpaMain*
+
+      ```java
+      Member member1 = new Member();
+      member1.setUsername("member1");
+      em.persist(member1);
+      
+      em.flush();
+      em.clear();
+      
+      Member m1 = em.find(Member.class, member1.getId());
+      System.out.println("m1 = " + m1.getClass());
+      
+      Member reference = em.getReference(Member.class, member1.getId());
+      System.out.println("reference = " + reference.getClass());
+      ```
+
+    *실행*
+
+    ![](img2/img_6.png)
+
+    - `em.getReference(Member.class, member1.getId());`로 반환받은 `reference`도 실제 클래스가 출력된다.
+  - 프록시 객체가 영속성 컨텍스트에 등록될 경우 `em.find()`를 호출해도 프록시 객체가 반환된다.
+
+    *JpaMain*
+
+      ```java
+      Member member1 = new Member();
+      member1.setUsername("member1");
+      em.persist(member1);
+      
+      em.flush();
+      em.clear();
+      
+      Member refMember = em.getReference(Member.class, member1.getId());
+      System.out.println("refMember = " + refMember.getClass()); //Proxy
+      
+      Member findMember = em.find(Member.class, member1.getId());
+      System.out.println("findMember = " + findMember.getClass()); //Member
+      
+      System.out.println("refMember == findMember: " + (refMember == findMember));
+      ```
+
+    *실행*
+
+    ![](img2/img_7.png)
+
+    - `em.find(Member.class, member1.getId());`로 반환받은 `findMember` 또한 프록시 객체이고 `refMember`와 `findMember`객체가 같은 객체값이란걸 확인할 수 있다.
+- 영속성 컨텍스트의 도움을 받을 수 없는 준영속 상태일 때, 프록시를 초기화하면 문제 발생
+  (하이버네이트는 `org.hibernate.LazyInitializationException` 예외를 터트림)
+  - **주의 실무에서 자주 발생**
+
+> 참고: JPA 표준 명세는 지연로딩(프록시)에 대한 내용을 JPA 구현체에 맡겼다. 따라서 준영속 상태의 엔티티를 초기화할 때 어떤 일이 발생할지 표준 명세에는 정의되어 있지 않다. 하이버네이트를 사용하면 `org.hibernate.LazyInitializationException` 예외가 발생한다.
+>
+
+### 프록시 확인
+
+- **프록시 인스턴스의 초기화 여부 확인**
+  `PersistenceUnitUtil.isLoaded(Object entity)`
+- **프록시 클래스 확인 방법**
+  `entity.getClass().getName()` 출력(..javasist.. or HibernateProxy…)
+- **프록시 강제 초기화**
+  `org.hibernate.Hibernate.initialize(entity);`
+- 참고: JPA 표준은 강제 초기화 없음
+  강제 호출: `member.getName()`
+
+*JpaMain*
+
+```java
+Member member1 = new Member();
+member1.setUsername("member1");
+em.persist(member1);
+
+em.flush();
+em.clear();
+
+Member refMember = em.getReference(Member.class, member1.getId());
+System.out.println("refMember = " + refMember.getClass()); //Proxy
+
+Hibernate.initialize(refMember); //강제초기화
+
+System.out.println("isLoaded = " + emf.getPersistenceUnitUtil().isLoaded(refMember));
+```
+
+- `EntityManagerFactory`에서 `getPersistenceUnitUtil()`을 호출해서 `PersistenceUnitUtil`을 가져와야 한다.
+
+*실행*
+
+![](img2/img_8.png)
