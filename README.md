@@ -3255,7 +3255,7 @@ member.getName(); //1. getName();
     System.out.println("reference = Member: " + ( reference instanceof Member ));
     ```
 
-- 영속성 컨텍스트에 찾는 엔티티가 이미 있으면 `**em.getReference()**`를 호출해도 실제 엔티티 반환
+- 영속성 컨텍스트에 찾는 엔티티가 이미 있으면 `em.getReference()`를 호출해도 실제 엔티티 반환
   - 영속성 컨텍스트에 이미 해당 객체가 있으므로 굳이(성능상에도) 프록시 객체를 만들 필요가 없으므로 실제 엔티티 반환
   - 영속성 컨텍스트에 이미 등록된 객체를 반환받을 때 같은 Key값의 객체는 항상 같은 객체여야 하기 때문에 실제 엔티티를 반환한다. (1차 캐시)
 
