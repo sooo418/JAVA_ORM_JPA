@@ -3348,3 +3348,192 @@ System.out.println("isLoaded = " + emf.getPersistenceUnitUtil().isLoaded(refMemb
 *실행*
 
 ![](img2/img_8.png)
+
+## 즉시 로딩과 지연 로딩
+
+### Member를 조회할 때 Team도 함께 조회해야 할까?
+
+![](img2/img_9.png)
+
+- JPA는 개발자가 연관된 엔티티의 조회 시점을 선택할 수 있도록 다음 두 가지 방법을 제공한다.
+  - 즉시 로딩: 엔티티를 조회할 때 연관된 엔티티도 함께 조회한다.
+    - ex) `em.find(Member.class, “member1”)` 를 호출할 때 회원 엔티티와 연관된 팀 엔티티도 함께 조회한다.
+    - 설정 방법: `@ManyToOne(fetch = FetchType.EAGER)`
+  - 지연 로딩: 연관된 엔티티를 실제 사용할 때 조회한다.
+    - ex) `member.getTeam().getName()` 처럼 조회한 팀 엔티티를 실제 사용하는 시점에 JPA가 SQL을 호출해서 팀 엔티티를 조회한다.
+    - 설정 방법: `@ManyToOne(fetch = FetchType.LAZY)`
+
+**지연 로딩 LAZY을 사용해서 프록시로 조회**
+
+---
+
+*Member*
+
+```java
+@Entity
+public class Member extends BaseEntity {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+//    @Column(name = "TEAM_ID")
+//    private Long teamId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
+    //Getter, Setter...
+}
+```
+
+*JpaMain*
+
+```java
+Team team = new Team();
+team.setName("teamA");
+em.persist(team);
+
+Member member1 = new Member();
+member1.setUsername("member1");
+member1.setTeam(team);
+em.persist(member1);
+
+em.flush();
+em.clear();
+
+Member m = em.find(Member.class, member1.getId());
+
+System.out.println("m = " + m.getTeam().getClass());
+
+System.out.println("==============");
+m.getTeam().getName();  //프록시 객체 초기화
+System.out.println("==============");
+```
+
+*실행*
+
+![](img2/img_10.png)
+
+- `Team` 테이블은 조회하지 않고 `Member` 테이블만 조회하며 `Team` 객체의 클래스를 조회해 보면 HibernateProxy 객체인걸 확인할 수 있다.
+- `m.getTeam().getName();`코드가 실행이 되면서 `Team` 테이블을 조회한다. (프록시 객체 초기화)
+
+![](img2/img_11.png)
+
+![](img2/img_12.png)
+
+```java
+Team team = member.getTeam();
+team.getname(); // 실제 team을 사용하는 시점에 초기(DB 조회)
+```
+
+### Member와 Team을 자주 함께 사용한다면?
+
+![](img2/img_13.png)
+
+**즉시 로딩 EAGER를 사용해서 함께 조회**
+
+---
+
+*Member*
+
+```java
+@Entity
+public class Member extends BaseEntity {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+//    @Column(name = "TEAM_ID")
+//    private Long teamId;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
+    //Getter, Setter...
+}
+```
+
+*JpaMain*
+
+```java
+Team team = new Team();
+team.setName("teamA");
+em.persist(team);
+
+Member member1 = new Member();
+member1.setUsername("member1");
+member1.setTeam(team);
+em.persist(member1);
+
+em.flush();
+em.clear();
+
+Member m = em.find(Member.class, member1.getId());
+
+System.out.println("m = " + m.getTeam().getClass());
+
+System.out.println("==============");
+System.out.println("teamName = " + m.getTeam().getName());
+System.out.println("==============");
+```
+
+*실행*
+
+![](img2/img_14.png)
+
+- `em.find(Member.class, member1.getId());` 이 실행될 때 `Member` 테이블과 `Team` 테이블을 LEFT JOIN 하여 한번에 데이터를 가져오는걸 확인할 수 있다.
+- `Team` 객체가 프록시 객체가 아닌 실제 객체이다.
+
+**즉시 로딩(EAGER), Member 조회시 항상 Team도 조회**
+
+---
+
+![](img2/img_15.png)
+
+![](img2/img_16.png)
+
+- **대부분의 JPA 구현체는 즉시 로딩을 최적화하기 위해 가능하면 조인 쿼리를 사용한다.**
+
+### 프록시와 즉시 로딩 주의
+
+---
+
+- **가급적 지연 로딩만 사용(특히 실무에서)**
+- 즉시 로딩을 적용하면 예상하지 못한 SQL이 발생
+- **즉시 로딩은 JPQL에서 N + 1 문제를 일으킨다.**
+  - **JPQL은 일단 SQL로 변형이 되기 때문에 일단 `Member` 테이블을 조회할거고 `Member`엔티티의 `Team`엔티티를 조회해야 하기 때문에 `Team` 테이블을 조회하는 SQL이 한 번 더 실행이 된다.**
+- `**@ManyToOne`, `@OneToOne` 은 기본이 즉시 로딩이기 때문에 LAZY로 설정해 주어야 한다.**
+- `@OneToMany`, `@ManyToMany` 는 기본이 지연 로딩이다.
+
+### 지연 로딩 활용
+
+- `Member`와 `Team`은 자주 함께 사용 → **즉시 로딩**
+- `Member`와 `Order`는 가끔 사용 → **지연 로딩**
+- `Order`와 `Product`는 자주 함께 사용 → **즉시 로딩**
+
+![](img2/img_17.png)
+
+- `Member` 엔티티를 조회시 즉시 로딩인 `Team` 엔티티만 조회되고 `Orders`는 프록시 객체가 반환된다.
+
+![](img2/img_18.png)
+
+- `Member` 엔티티에서 `Orders`를 사용시 `Order` 엔티티가 조회되면서 `Order` 의 즉시 로딩인 `Product` 엔티티를 조회한다.
+
+**지연 로딩 활용 - 실무**
+
+---
+
+- **모든 연관관계에 지연 로딩을 사용해라!**
+- **실무에서 즉시 로딩을 사용하지 마라!**
+- **JPQL fetch 조인이나, 엔티티 그래프 기능을 사용해라!(뒤에서 설명)**
+- **즉시 로딩은 상상하지 못한 쿼리가 나간다.**
