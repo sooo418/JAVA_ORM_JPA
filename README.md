@@ -2418,8 +2418,6 @@ public void addMember(Member member) {
 - **읽기 전용 필드**를 사용해서 양방향 처럼 사용하는 방법
 - **다대일 양방향을 사용하자**
 
-# 리뷰 완료
-
 ## 일대일[1:1]
 
 **일대일 관계**
@@ -2505,6 +2503,7 @@ public void addMember(Member member) {
   - 장점: 주 테이블과 대상 테이블을 일대일에서 일대다 관계로 변경할 때 테이블 구조 유지
   - 단점: 프록시 기능의 한계로 **지연 로딩으로 설정해도 항상 즉시 로딩됨**(프록시는 뒤에서 설명)
 
+# 리뷰 완료
 
 ## 다대다[N:M]
 
@@ -3537,3 +3536,249 @@ System.out.println("==============");
 - **실무에서 즉시 로딩을 사용하지 마라!**
 - **JPQL fetch 조인이나, 엔티티 그래프 기능을 사용해라!(뒤에서 설명)**
 - **즉시 로딩은 상상하지 못한 쿼리가 나간다.**
+
+## 영속성 전이: CASCADE
+
+- 특정 엔티티를 영속 상태로 만들 때 연관된 엔티티도 함께 영속상태로 만드고 싶을 때
+- 예: 부모 엔티티를 저장할 때 자식 엔티티도 함께 저장
+
+![](img2/img_19.png)
+
+**영속성 전이: 저장**
+
+---
+
+- `@OneToMany(mappedBy="parent", cascade=CascadeType.PERSIST)`
+
+![](img2/img_20.png)
+
+*Parent*
+
+```java
+@Entity
+public class Parent {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "parent")
+    private List<Child> childList = new ArrayList<>();
+
+		//연관관계 편의 메소드
+    public void addChild(Child child) {
+        childList.add(child);
+        child.setParent(this);
+    }
+
+    //Getter, Setter
+}
+```
+
+*Child*
+
+```java
+@Entity
+public class Child {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "PARENT_ID")
+    private Parent parent;
+
+    //Getter, Setter
+}
+```
+
+*JpaMain*
+
+```java
+Child child1 = new Child();
+Child child2 = new Child();
+
+Parent parent = new Parent();
+parent.addChild(child1);
+parent.addChild(child2);
+
+em.persist(parent);
+em.persist(child1);
+em.persist(child2);
+```
+
+- 만약 `Parent`엔티티에 `Child`엔티티를 담고 DB에 적재하려면 `Parent`뿐만 아니라 `Child` 모두 영속화 해줘야 DB INSERT SQL을 실행하게 된다.
+- 이런 과정을 생략하기 위해서 CASCADE를 사용할 수 있다.
+
+**CASCADE 적용**
+
+---
+
+*Parent*
+
+```java
+@Entity
+public class Parent {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    private List<Child> childList = new ArrayList<>();
+
+		//연관관계 편의 메소드
+    public void addChild(Child child) {
+        childList.add(child);
+        child.setParent(this);
+    }
+
+    //Getter, Setter
+}
+```
+
+- `@OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)` 적용
+
+*JpaMain*
+
+```java
+Child child1 = new Child();
+Child child2 = new Child();
+
+Parent parent = new Parent();
+parent.addChild(child1);
+parent.addChild(child2);
+
+em.persist(parent);
+
+tx.commit();
+```
+
+- `Parent`에 `Child`를 담고 `Parent`만 영속화 해줌
+
+*실행*
+
+![](img2/img_21.png)
+
+- `Parent`뿐만 아니라 `Child`도 INSERT SQL이 실행된다.
+
+**영속성 전이: CASCADE - 주의!**
+
+---
+
+- 영속성 전이는 연관관계를 매핑하는 것과 아무 관련이 없음
+- 엔티티를 영속화할 때 연관된 엔티티도 함께 영속화하는 편리함을 제공할 뿐 그 이상 그 이하도 아님
+
+### CASCADE의 종류
+
+- **ALL: 모두 적용**
+- **PERSIST: 영속**
+- **REMOVE: 삭제**
+- MERGE: 병합
+- REFRESH: REFRESH
+- DETACH: DETACH
+
+**보통 ALL, PERSIST를 많이 사용되고 REMOVE 속성을 사용하고 싶지않을 때 PERSIST를 사용한다.**
+
+> **주의: 일대다일 때 무조건 사용해야 하는건 아니고 두 엔티티의 라이프싸이클이 같을 때나 단일 소유자(Parent만 Child 엔티티를 소유하고 있을때)일 때만 사용해야 한다.**
+>
+
+## 고아객체
+
+- 고아 객체 제거: 부모 엔티티와 연관관계가 끊어진 자식 엔티티를 자동으로 삭제
+- **orphanRemoval = true**
+
+```java
+Parent parent1 = em.find(Parent.class, id);
+parent1.getChildren().remove(0);
+//자식 엔티티를 컬렉션에서 제거
+```
+
+- DELETE FROM CHILD WHERE ID = ?
+
+*Parent*
+
+```java
+@Entity
+public class Parent {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private String name;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Child> childList = new ArrayList<>();
+    
+    //연관관계 편의 메소드
+    public void addChild(Child child) {
+        childList.add(child);
+        child.setParent(this);
+    }
+
+    //Getter, Setter
+}
+```
+
+- `@OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)` 적용
+
+*JpaMain*
+
+```java
+Child child1 = new Child();
+Child child2 = new Child();
+
+Parent parent = new Parent();
+parent.addChild(child1);
+parent.addChild(child2);
+
+em.persist(parent);
+
+em.flush();
+em.clear();
+
+Parent findParent = em.find(Parent.class, parent.getId());
+findParent.getChildList().remove(0);
+
+tx.commit();
+```
+
+- 첫번째 `Child`를 부모 엔티티와 연관관계를 끊었다.
+
+*실행*
+
+![](img2/img_22.png)
+
+- DELETE SQL이 실행됨
+
+**고아 객체 - 주의**
+
+---
+
+- 참조가 제거된 엔티티는 다른 곳에서 참조하지 않는 고아 객체로 보고 삭제하는 기능
+- **참조하는 곳이 하나일 때 사용해야함!(단일 소유자)**
+- **특정 엔티티가 개인 소유할 때 사용**
+- `@OneToOne`, `@OneToMany`만 가능
+- 참고: 개념적으로 부모를 제거하면 자식은 고아가 된다. 따라서 고아 객체 제거 기능을 활성화 하면, 부모를 제거할 때 자식도 함께 제거된다. 이것은 CascadeType.REMOVE처럼 동작한다.
+  - `Parent`를 제거하면 연관된 `Child`들 또한 모두 제거된다.
+    - `orphanRemoval = true` , `CascadeType.ALL 또는 REMOVE`둘 중 하나라도 적용하면 제거됨.
+
+### 영속성 전이 + 고아 객체, 생명주기
+
+- **CascadeType.ALL + orphanRemovel = true**
+- 스스로 생명주기를 관리하는 엔티티는 em.persist()로 영속화, em.remove()로 제거
+- 두 옵션을 모두 활성화 하면 부모 엔티티를 통해서 자식의 생명주기를 관리 할 수 있음
+  - `Parent`는 EntityManager의 영속성 컨텍스트를 통해서 직접적으로 생명주기를 관리함
+  - `Child`는 `Parent`에서 생명주기를 관리함
+    - `parent.getChildList().remove(0);`
+    - `Child`의 repository를 만들지 않아도 된다는 걸 뜻함
+- 도메인 주도 설계(DDD)의 Aggregate Root개념을 구현할 때 유용
+  - 리포지토리는 Aggregate Root만 컨택하고 나머지는 리포지토리를 만들지 않는것이 유용하다.
+  - 나머지는 Aggregate Root를 통해서 생명주기를 관리한다.
