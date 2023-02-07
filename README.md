@@ -3912,3 +3912,83 @@ tx.commit();
 - 임베디드 타입을 사용하기 전과 후에 **매핑하는 테이블은 같다.**
 - 객체와 테이블을 아주 세밀하게(find-grained) 매핑하는것이 가능
 - 잘 설계한 ORM 애플리케이션은 매핑한 테이블의 수보다 클래스의 수가 더 많음
+
+**임베디드 타입과 연관관계**
+
+---
+
+![](img2/img_26.png)
+
+- `Member`라는 엔티티가 `Address`라는 값 타입과 `PhoneNumber`라는 값타입을 가지고 있다.
+- `Address`는 `Zipcode`라는 값타입을 가지고 있다.
+- `PhoneNumber`라는 값타입이 `PhoneEntity`라는 엔티티 타입을 가지고 있다.
+  - 즉 `PhoneNumber`라는 임베디드 타입에서  `PhoneEntity`외래 키 값을 가지게 해면 된다.
+
+**@AttributeOverried: 속성 재정의**
+
+---
+
+- 한 엔티티에서 같은 값 타입을 사용하면?
+- 컬럼 명이 중복됨
+- `@AttributeOverrides`, `@AttributeOverride`를 사용해서 컬럼 명 속성을 재정의
+
+*Address*
+
+```java
+@Embeddable
+public class Address {
+    private String city;
+    private String street;
+    private String zipcode;
+
+    //Construct, Getter, Setter...
+}
+```
+
+*Member*
+
+```java
+@Entity
+public class Member {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+    //기간
+    @Embedded
+    private Period workPeriod;
+
+    //주소
+    @Embedded
+    private Address homeAddress;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "city",
+                    column = @Column(name = "WORK_CITY")),
+            @AttributeOverride(name = "street",
+                    column = @Column(name = "WORK_STREET")),
+            @AttributeOverride(name = "zipcode",
+                    column = @Column(name = "WORK_ZIPCODE"))
+    })
+    private Address workAddress;
+		
+    //Getter, Setter...
+}
+```
+
+- `Member`에서
+  - `@Embedded
+    private Period workPeriod;`
+  - `@Embedded
+    private Address workAddress;`
+- 와 같이 사용하면 `org.hibernate.MappingException`이 발생할 것이다.
+  그래서 위의 소스처럼 `@AttributeOverrides`와 `@AttributeOverride`를 사용해서 해결할 수 있다.
+
+*실행*
+
+![](img2/img_27.png)
