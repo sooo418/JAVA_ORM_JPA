@@ -3992,3 +3992,334 @@ public class Member {
 *실행*
 
 ![](img2/img_27.png)
+
+## 값 타입과 불변 객체
+
+- 값 타입은 복잡한 객체 세상을 조금이라도 단순화하려고 만든 개념이다. 따라서 값 타입은 단순하고 안전하게 다룰 수 있어야 한다.
+
+**값 타입 공유 참조**
+
+---
+
+- 임베디드 타입 같은 값 타입을 여러 엔티티에서 공유하면 위험함
+- 부작용(side effect)발생
+
+![](img2/img_28.png)
+
+*JpaMain*
+
+```java
+Address address = new Address("city", "street", "10000");
+
+Member member = new Member();
+member.setUsername("member1");
+member.setHomeAddress(address);
+em.persist(member);
+
+Member member2 = new Member();
+member2.setUsername("member2");
+member2.setHomeAddress(address);
+em.persist(member2);
+
+//member의 address에서 city값 변경
+member.getHomeAddress().setCity("newCity");
+
+tx.commit();
+```
+
+- 위의 `JpaMain` 소스에서 `member`의 city값을 ‘newCity’로 변경하였다. 의도한 바는 `member`의 city값만 ‘newCity’로 바뀌고 `member2`의 city값은 ‘city’이다.
+
+*실행*
+
+![](img2/img_29.png)
+
+- 하지만 UPDATE SQL은 두 번 실행되고 있다.
+
+![](img2/img_30.png)
+
+- 데이터 역시 둘 다 ‘newCity’로 저장되어 있다.
+- **side effect 발생**
+
+**값 타입 복사**
+
+---
+
+- 값 타입의 실제 인스턴스인 값을 공유하는 것은 위험
+- 대신 값(인스턴스)를 복사해서 사용
+
+![](img2/img_31.png)
+
+*JpaMain*
+
+```java
+Address address = new Address("city", "street", "10000");
+
+Member member = new Member();
+member.setUsername("member1");
+member.setHomeAddress(address);
+em.persist(member);
+
+//Address 인스턴스를 복사
+Address copyAddress = new Address(address.getCity(), address.getStreet(), address.getZipcode());
+
+Member member2 = new Member();
+member2.setUsername("member2");
+member2.setHomeAddress(copyAddress);
+em.persist(member2);
+
+//member의 address에서 city값 변경
+member.getHomeAddress().setCity("newCity");
+
+tx.commit();
+```
+
+- 위처럼 address의 값들을 복사해서 copyAddress를 생성하면 의도한대로 동작할 것이다.
+
+*실행*
+
+![](img2/img_32.png)
+
+- UPDATE SQL이 한 번 실행이 되었다.
+
+![](img2/img_33.png)
+
+- 데이터 역시 member 하나만 ‘newCity’를 가지고 있다.
+
+**객체 타입의 한계**
+
+---
+
+- 항상 값을 복사해서 사용하면 공유 참조로 인해 발생하는 부작용을 피할 수 있다.
+- 문제는 임베디드 타입처럼 **직접 정의한 값 타입은 자바의 기본 타입이 아니라 객체 타입**이다.
+- 자바 기본 타입에 값을 대입하면 값을 복사한다.
+- **객체 타입은 참조 값을 직접 대입하는 것을 막을 방법이 없다.**
+- **객체의 공유 참조는 피할 수 없다.**
+
+*기본 타입(primitive type)*
+
+```java
+int a = 10;
+int b = a; //기본 타입은 값을 복사
+b = 4;
+```
+
+- a값은 변함 없음
+
+*객체 타입*
+
+```java
+Address a = new Address("old");
+Address b = a; //객체 타입은 참조를 전달
+b.setCity("New");
+```
+
+- a의 city값이 “New”로 변경됨
+
+**불변 객체**
+
+---
+
+- 객체 타입을 수정할 수 없게 만들면 **부작용을 원천 차단**
+- **값 타입은 불변 객체(immutable object)로 설계해야함**
+- **불변 객체: 생성 시점 이후 절대 값을 변경할 수 없는 객체**
+- 생성자로만 값을 설정하고 수정자(Setter)를 만들지 않으면 됨
+- 참고: Integer, String은 자바가 제공하는 대표적인 불변 객체
+
+**값을 변경하고 싶다면?**
+
+---
+
+*JpaMain*
+
+```java
+Address address = new Address("city", "street", "10000");
+
+Member member = new Member();
+member.setUsername("member1");
+member.setHomeAddress(address);
+em.persist(member);
+
+Address newAddress = new Address("newCity", address.getStreet(), address.getZipcode());
+member.setHomeAddress(newAddress);
+
+tx.commit();
+```
+
+- 만약 위와같이 이미 `member`에 Address값이 세팅되어 있다면 새로운 Address 객체를 만들어서 set해주어야 한다.
+
+## 값 타입의 비교
+
+- 값 티입: 인스턴스가 달라고 그 안에 값이 같으면 같은 것으로 봐야 함
+- **동일성(idendity) 비교**: 인스턴스의 참조 값을 비교, == 사용
+- **동등성(equivalence) 비교**: 인스턴스의 값을 비교, equals() 사용
+- 값 타입은 a.equals(b)를 사용해서 동등성 비교를 해야 함
+- 값 타입의 equals() 메소드를 적절하게 재정의(주로 모든 필드 사용)
+
+*Address*
+
+```java
+@Embeddable
+public class Address {
+    private String city;
+    private String street;
+    private String zipcode;
+
+		//Construct, Getter, Setter...
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(city, address.city) && Objects.equals(street, address.street) && Objects.equals(zipcode, address.zipcode);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(city, street, zipcode);
+    }
+}
+```
+
+> 참고: equals()를 재정의하면 hashCode()도 재정의하는 것이 안전하다. 그렇지 않으면 해시를 사용하는 컬렉션(HashSet, HashMap)이 정상 동작하지 않는다. 자바 IDE에는 대부분 equals, hashCode 메소드를 자동으로 생성해주는 기능이 있다.
+>
+
+## 값 타입 컬렉션
+
+![](img2/img_34.png)
+
+- 값 타입을 하나 이상 저장할 때 사용
+- `@ElementCollection`, `@CollectionTable` 사용
+- 데이터베이스는 컬렉션을 같은 테이블에 저장할 수 없다.
+- 컬렉션을 저장하기 위한 별도의 테이블이 필요함
+
+> 참고:
+FAVORITE_FOOD 테이블의 PK는 (MEMBER_ID, FOOD_NAME)이고,
+ADDRESS 테이블의 PK는 (MEMBER_ID, CITY, STREET, ZIPCODE)이다.
+**왜냐하면 favoriteFoods와 addressHistory는 값 타입이기 때문이고, 식별자 같은 별도의 ID를 가지게 되면 값 타입이 아닌 엔티티가 되어 버린다.**
+>
+
+### **값 타입 컬렉션 사용**
+
+**값 타입 저장 예제**
+
+---
+
+*Member*
+
+```java
+@Entity
+public class Member {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+    @Embedded
+    private Address homeAddress;
+
+    @ElementCollection
+    @CollectionTable(name = "FAVORITE_FOOD", joinColumns =
+        @JoinColumn(name = "MEMBER_ID")
+    )
+    @Column(name = "FOOD_NAME") //별도의 변수 명이 없으므로 컬럼명 정의
+    private Set<String> favoriteFoods = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "ADDRESS", joinColumns =
+        @JoinColumn(name = "Member_ID")
+    )
+    private List<Address> addressHistory = new ArrayList<>();
+
+    //Getter, Setter...
+}
+```
+
+*JpaMain*
+
+```java
+Member member = new Member();
+member.setUsername("member1");
+member.setHomeAddress(new Address("homeCity", "street", "10000"));
+
+member.getFavoriteFoods().add("치킨");
+member.getFavoriteFoods().add("족발");
+member.getFavoriteFoods().add("피자");
+
+member.getAddressHistory().add(new Address("old1", "street", "10000"));
+member.getAddressHistory().add(new Address("old2", "street", "10000"));
+
+em.persist(member);
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_35.png)
+
+![](img2/img_36.png)
+
+- 실제 저장한 값은 `member`인데 값 타입 컬렉션들도 INSERT SQL을 실행되고 있다.
+  - **값 타입 컬렉션들의 생명주기는 자신이 아닌 엔티티에 의존한다.**
+
+**값 타입 조회**
+
+---
+
+*JpaMain*
+
+```java
+Member findMember = em.find(Member.class, member.getId());
+
+List<Address> addressHistory = findMember.getAddressHistory();
+for (Address address : addressHistory) {
+    System.out.println("address = " + address.getCity());
+}
+
+Set<String> favoriteFoods = findMember.getFavoriteFoods();
+for (String favoriteFood : favoriteFoods) {
+    System.out.println("favoriteFood = " + favoriteFood);
+}
+```
+
+*실행*
+
+![](img2/img_37.png)
+
+![](img2/img_38.png)
+
+- 로그를 확인해보면 **값 타입 컬렉션은 지연 로딩이 기본 값**으로 설정되어 있는 걸 알 수 있다.
+
+**값 타입 수정 예제**
+
+---
+
+*JpaMain*
+
+```java
+Member findMember = em.find(Member.class, member.getId());
+
+//homeCity -> newCity
+Address a = findMember.getHomeAddress();
+findMember.setHomeAddress(new Address("newCity", a.getStreet(), a.getZipcode()));
+
+//치킨 -> 한식
+findMember.getFavoriteFoods().remove("치킨");
+findMember.getFavoriteFoods().add("한식");
+
+tx.commit();
+```
+
+- `Address`는 불변 객체이기 때문에 새로 생성해서 변경해주어야 함.
+
+*실행*
+
+![](img2/img_39.png)
+
+- 컬렉션의 값만 제거하고 추가해도 DELETE SQL과 INSERT SQL이 실행된다.
+
+**참고: 값 타입 컬렉션은 영속성 전에(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.**
