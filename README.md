@@ -4323,3 +4323,146 @@ tx.commit();
 - 컬렉션의 값만 제거하고 추가해도 DELETE SQL과 INSERT SQL이 실행된다.
 
 **참고: 값 타입 컬렉션은 영속성 전에(Cascade) + 고아 객체 제거 기능을 필수로 가진다고 볼 수 있다.**
+
+**값 타입 컬렉션의 제약사항**
+
+---
+
+- 값 타입은 엔티티와 다르게 식별자 개념이 없다.
+- 값은 변경하면 추적이 어렵다.
+- 값 타입 컬렉션에 변경 사항이 발생하면, 주인 엔티티와 연관된 모든 데이터를 삭제하고, 값 타입 컬렉션에 있는 현재 값을 모두 다시 저장한다.
+- 값 타입 컬렉션을 매핑하는 테이블은 모든 컬럼을 묶어서 기본 키를 구성해야 함: **null 입력X, 중복 저장X**
+
+*JpaMain*
+
+```java
+Member member = new Member();
+member.setUsername("member1");
+member.setHomeAddress(new Address("homeCity", "street", "10000"));
+
+member.getFavoriteFoods().add("치킨");
+member.getFavoriteFoods().add("족발");
+member.getFavoriteFoods().add("피자");
+
+member.getAddressHistory().add(new Address("old1", "street", "10000"));
+member.getAddressHistory().add(new Address("old2", "street", "10000"));
+
+em.persist(member);
+
+em.flush();
+em.clear();
+
+System.out.println("============== START ==============");
+Member findMember = em.find(Member.class, member.getId());
+
+//값 타입 컬렉션의 객체 변경
+findMember.getAddressHistory().remove(new Address("old1", "street", "10000"));
+findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_40.png)
+
+- `Address`의 주인 엔티티인 `Member`와 연관된 데이터를 모두 DELETE 하고 다시 INSERT 한다.
+
+**값 타입 컬렉션 대안**
+
+---
+
+- 실무에서는 상황에 따라 **값 타입 컬렉션 대신에 일대다 관계를 고려**
+- 일대다 관계를 위한 엔티티를 만들고, 여기에서 값 타입을 사용
+- 영속성 전이(Cascade) + 고아 객체 제거를 사용해서 값 타입 컬렉션 처럼 사용
+- EX) AddressEntity
+
+*AddressEntity*
+
+```java
+@Entity
+@Table(name = "ADDRESS")
+public class AddressEntity {
+
+    @Id
+    @GeneratedValue
+    private Long id;
+
+    private Address address;
+
+    public AddressEntity() {
+    }
+
+    public AddressEntity(String city, String street, String zipcode) {
+        this.address = new Address(city, street, zipcode);
+    }
+
+    //Getter, Setter...
+}
+```
+
+*Member*
+
+```java
+@Entity
+public class Member {
+
+    @Id @GeneratedValue
+    @Column(name = "MEMBER_ID")
+    private Long id;
+
+    @Column(name = "USERNAME")
+    private String username;
+
+    //주소
+    @Embedded
+    private Address homeAddress;
+
+    @ElementCollection
+    @CollectionTable(name = "FAVORITE_FOOD", joinColumns =
+        @JoinColumn(name = "MEMBER_ID")
+    )
+    @Column(name = "FOOD_NAME") //별도의 변수 명이 없으므로 컬럼명 정의
+    private Set<String> favoriteFoods = new HashSet<>();
+
+    //값 타입 컬렉션을 일대다 연관관계로 풀어냄 -> 값 타입을 엔티티로 승급
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "MEMBER_ID")
+    private List<AddressEntity> addressHistory = new ArrayList<>();
+
+    //Getter, Setter...
+}
+```
+
+- `Address`를 `@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)`를 사용해 영속성 전이 + 고아 객체 적용시켜 값 타입 컬렉션처럼 생명주기를 주인인 엔티티에 의존하도록 적용
+
+![](img2/img_41.png)
+
+![](img2/img_42.png)
+
+- 일대단 단방향 매핑이라 UPDATE문이 실행되는건 어쩔 수 없다.
+  - 대상 테이블에 외래 키가 있기 때문에
+
+> 값 타입 컬렉션은 진짜 간단한 경우에만 사용한다.
+Ex) 좋아하는 음식을 고르는데 체크 박스로 되어 있어서 다중 선택이 가능할 때 → 추적할 필요도 없고 값이 바뀌어도 UPDATE를 칠 필요가 없는 경우
+**※ 주소 같은 정보들은 값 타입 컬렉션보다 엔티티를 사용**
+>
+
+**정리**
+
+---
+
+- **엔티티 타입의 특징**
+  - 식별자 O
+  - 생명 주기 관리
+  - 공유
+- **값 타입의 특징**
+  - 식별자 X
+  - 생명 주기를 엔티티에 의존
+  - 공유하지 않는 것이 안전(복사해서 사용)
+  - 불변 객체로 만드는 것이 안전
+
+> 참고: 값 타입은 정말 값 타입이라 판단될 때만 사용
+엔티티와 값 타입을 혼동해서 엔티티를 값 타입으로 만들면 안됨
+식별자가 필요하고, 지속해서 값을 추적, 변경해야 한다면 그것은 값 타입이 아닌 엔티티
+>
