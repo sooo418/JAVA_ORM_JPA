@@ -4361,7 +4361,8 @@ findMember.getAddressHistory().add(new Address("newCity1", "street", "10000"));
 
 tx.commit();
 ```
-
+- `List` 컬렉션에서 `remove()`를 사용 시 `equals()`를 사용하여 특정 객체를 찾는데 `equals()`나 `hashCode()`가 정상적으로 동작하지 않을 경우 값을 제대로 찾지 못한다.
+  - 즉, 값 타입 컬렉션 클래스에 `equals()` 와 `hashCode()`를 재정의하여 사용해야 한다.
 *실행*
 
 ![](img2/img_40.png)
