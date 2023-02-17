@@ -2293,6 +2293,10 @@ public void addMember(Member member) {
 
 # 다양한 연관관계 매핑
 
+**목차**
+
+---
+
 - 연관관계 매핑시 고려사항 3가지
 - 다대일[N:1]
 - 일다대[1:N]
@@ -4467,3 +4471,231 @@ Ex) 좋아하는 음식을 고르는데 체크 박스로 되어 있어서 다중
 엔티티와 값 타입을 혼동해서 엔티티를 값 타입으로 만들면 안됨
 식별자가 필요하고, 지속해서 값을 추적, 변경해야 한다면 그것은 값 타입이 아닌 엔티티
 >
+
+# 객체지향 쿼리 언어(JPQL)
+
+**목차**
+
+---
+
+- 객체지향 쿼리 언어 소개
+- JPQL
+- 기본 문법과 기능
+- 페치 조인
+- 경로 표현식
+- 다형성 쿼리
+- 엔티티 직접 사용
+- Named 쿼리
+- 벌크 연산
+
+## 객체지향 쿼리 언어 소개
+
+**JPA는 다양한 쿼리 방법을 지원**
+
+---
+
+- **JPQL**
+- JPA Criteria
+- **QueryDSL**
+- 네이티브 SQL
+- JDBC API 직접 사용, MyBatis, SpringJdbcTemplate 함께 사용
+
+### JPQL 소개
+
+- 가장 단순한 조회 방법
+  - EntityManager.find()
+  - 객체 그래프 탐색(a.getB().getC())
+- **나이가 18살 이상인 회원을 모두 검색하고 싶다면?**
+
+### JPQL
+
+- JPA를 사용하면 엔티티 객체를 중심으로 개발
+- 문제는 검색 쿼리
+- 검색을 할 때도 **테이블이 아닌 엔티티 객체를 대상으로 검색**
+- 모든 DB 데이터를 객체로 변환해서 검색하는 것은 불가능
+- 애플리케이션이 필요한 데이터만 DB에서 불러오려면 결국 검색 조건이 포함된 SQL이 필요
+- JPA는 SQL을 추상화한 JPQL이라는 객체 지향 쿼리 언어 제공
+- SQL과 문법 유사, SELECT, FROM, WHERE, GROUP BY, HAVING, JOIN 지원
+- JPQL은 엔티티 객체를 대상으로 쿼리
+- SQL은 데이터베이스 테이블을 대상으로 쿼리
+
+```java
+//검색
+String jpql = "select m From Member m where m.name like '%hello%'";
+List<Member> result = em.createQuery(jpql, Member.class)
+        .getResultList();
+```
+
+- 테이블이 아닌 객체를 대상으로 검색하는 객체 지향 쿼리
+- SQL을 추상화해서 특정 데이터베이스 SQL에 의존 X
+- JPQL을 한마디로 정의하면 객체 지향 SQL
+
+**JPQL과 실행된 SQL**
+
+---
+
+```java
+List<Member> result = em.createQuery(
+        "select m from Member m where m.username like '%kim%'",
+        Member.class
+).getResultList();
+```
+
+![](img2/img_43.png)
+
+### Criteria 소개
+
+```java
+//Criteria 사용 준비
+CriteriaBuilder cb = em.getCriteriaBuilder();
+CriteriaQuery<Member> query = cb.createQuery(Member.class);
+
+//루트 클래스 (조회를 시작할 클래스)
+Root<Member> m = query.from(Member.class);
+
+//쿼리 생성 CriteriaQuery<Member> cq =
+query.select(m).where(cb.equal(m.get("username"), “kim”));
+List<Member> resultList = em.createQuery(cq).getResultList();
+```
+
+- 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
+- JPQL 빌더 역할
+- JPA 공식 기능
+- SQL 문법 오류시 컴파일 할 때 에러가 발생하여 오류를 미리 방지할 수 있다.
+- 동적으로 SQL을 작성할 수 있다.
+- **단점: 너무 복잡하고 실용성이 없다.**
+- Criteria 대신에 **QueryDSL 사용 권장**
+
+### QueryDSL 소개
+
+```java
+//JPQL
+//select m from Member m where m.age > 18
+JPAFactoryQuery query = new JPAQueryFactory(em);
+QMember m = QMember.member;
+
+List<Member> list =
+        query.selectFrom(m)
+            .where(m.age.gt(18))
+            .orderBy(m.name.desc())
+            .fetch();
+```
+
+- 문자가 아닌 자바코드로 JPQL을 작성할 수 있음
+- JPQL 빌더 역할
+- 컴파일 시점에 문법 오류를 찾을 수 있음
+- 동적 쿼리 작성이 편리함
+- **단순하고 쉬움**
+- **실무 사용 권장**
+
+### 네이티브 SQL 소개
+
+- JPA가 제공하는 SQL을 직접 사용하는 기능
+- JPQL로 해결할 수 없는 특정 데이터베이스에 의존적인 기능
+- 예) 오라클 CONNECT BY, 특정 DB만 사용하는 SQL 힌트
+
+> 참고: SQL힌트 같은 경우는 꼭 네이티브 SQL이 아닌 하이버테이브에서 지원해줌
+>
+
+```java
+String sql = "select MEMBER_ID, city, street, zipcode, USERNAME, from MEMBER";
+List<Member> resultList = em.createNativeQuery(sql, Member.class)
+        .getResultList();
+```
+
+![](img2/img_44.png)
+
+### JDBC 직접 사용, SpringJdbcTemplate 등
+
+- JPA를 사용하면서 JDBC 커넥션을 직접 사용하거나, 스프링 JdbcTemplate, 마이바티스 등을 함께 사용 가능
+- **단 영속성 컨텍스트를 적절한 시점에 강제로 플러시 필요**
+- **예) JPA를 우회해서 SQL을 실행하기 직전에 영속성 컨텍스트 수동 플래시**
+
+## JPQL(Java Persistence Query Language)
+
+### JPQL - 기본 문법과 기능
+
+**JPQL 소개**
+
+---
+
+- JPQL은 객체지향 쿼리 언어다. 따라서 테이블을 대상으로 쿼리하는 것이 아니라 **엔티티 객체를 대상으로 쿼리**한다.
+- **JPQL은 SQL을 추상화해서 특정 데이터베이스 SQL에 의존하지 않는다.**
+- JPQL은 결국 SQL로 변환된다.
+
+![](img2/img_45.png)
+
+![](img2/img_46.png)
+
+**JPQL 문법**
+
+---
+
+![](img2/img_47.png)
+
+- select m from **Member** as m where **m.age** > 18
+- 엔티티와 속성은 대소문자 구분 O (Member, age)
+- JPQL 키워드는 대소문자 구분 X (SELECT, FROM, where)
+- 엔티티 이름 사용, 테이블 이름이 아님(Member)
+  - `@Entity(name = "MEMBER")`
+- **별칭은 필수(m)** (as는 생략가능)
+
+**집합과 정렬**
+
+---
+
+```sql
+select
+    COUNT(m),   //회원수
+    SUM(m.age), //나이 합
+    AVG(m.age), //평균 나이
+    MAX(m.age), //최대 나이
+    MIN(m.age)  //최소 나이
+from Member m
+```
+
+- GROUP BY, HAVING
+- ORDER BY
+
+**TypeQuery, Query**
+
+---
+
+- TypeQuery: 반환 타입이 명확할 때 사용
+- Query: 반환 타입이 명확하지 않을 때 사용
+
+```java
+TypedQuery<Member> query = em.createQuery("select m from Member m", Member.class);
+```
+
+```java
+Query query = em.createQuery("select m.username, m.age from Member m");
+```
+
+**결과 조회 API**
+
+---
+
+- query.getResultList(): **결과가 하나 이상일 때**, 리스트 반환
+  - **결과가 없으면 빈 리스트 반환**
+    - **결과 값이 없어도 Exception이 발생 X**
+- query.getSingleResult(): **결과가 정확히 하나**, 단일 객체 반환
+  - **결과가 없으면: javax.persistence.NoResultException**
+  - **둘 이상이면: javax.persistence.NonUniqueResultException**
+
+**파라미터 바인딩 - 이름 기준, 위치 기준**
+
+---
+
+```java
+em.createQuery("select m from Member m where m.username = :username", Member.class)
+        .setParameter("username", "member1");
+```
+
+```java
+em.createQuery("select m from Member m where m.username = ?1", Member.class)
+        .setParameter(1, userNameParam);
+```
+
+- 위치 기준은 왠만해선 사용 X
+  - 파라미터를 위치로 관리하기 보다 이름으로 관리하는게 수월함
