@@ -4699,3 +4699,143 @@ em.createQuery("select m from Member m where m.username = ?1", Member.class)
 
 - 위치 기준은 왠만해선 사용 X
   - 파라미터를 위치로 관리하기 보다 이름으로 관리하는게 수월함
+
+## 프로젝션
+
+- SELECT 절에 조회할 대상을 지정하는 것
+- 프로젝션 대상: 엔티티, 임베디드 타입, 스칼라 타입(숫자, 문자 등 기본 데이터 타입)
+- 1차 캐시에 저장이 된다.
+- SELECT m FROM Member m → 엔티티 프로젝션
+- SELECT m.team FROM Member m → 엔티티 프로젝션
+  - JOIN을 하는지 확인하기 힘드므로 아래와 같이 명시적으로 사용하는걸 권장
+  - `SELECT t FROM Member m JOIN m.team t`
+- SELECT m.address FROM Member m → 임베디드 타입 프로젝션
+  - 임베디드 타입은 엔티티가 아니므로 FROM 절에 나올 수 없다.
+  - `SELECT a FROM Address a` X
+- SELECT m.username, m.age FROM Member m → 스칼라 타입 프로젝션
+- DISTINCT로 중복 제거
+
+### 프로젝션 - 여러 값 조회
+
+- SELECT m.username, m.age FROM Member m
+- Query 타입으로 조회
+
+```java
+List resultList = em.createQuery("select m.username, m.age from Member m")
+			.getResultList();
+
+Object o = resultList.get(0);
+Object[] result = (Object[]) o;
+System.out.println("username = " + result[0]);
+System.out.println("age = " + result[1]);
+```
+
+- Object[] 타입으로 조회
+
+```java
+List<Object[]> resultList = em.createQuery("select m.username, m.age from Member m")
+			.getResultList();
+
+Object[] result = resultList.get(0);
+System.out.println("username = " + result[0]);
+System.out.println("age = " + result[1]);
+```
+
+- new 명령어로 조회
+
+    ```java
+    public class MemberDTO {
+    
+        private String username;
+        private int age;
+    
+        public MemberDTO(String username, int age) {
+            this.username = username;
+            this.age = age;
+        }
+    }
+    ```
+
+    ```java
+    List<MemberDTO> resultList = em.createQuery("select new jpql.MemberDTO(m.username, m.age) from Member m", MemberDTO.class)
+    			.getResultList();
+    
+    MemberDTO memberDTO = resultList.get(0);
+    
+    System.out.println("username = " + memberDTO.getUsername());
+    System.out.println("age = " + memberDTO.getAge());
+    ```
+
+  - 단순 값을 DTO로 바로 조회
+  - `SELECT new jpabook.jpqlUserDTO(m.username, m.age) FROM Member m`
+  - 패키지 명을 포함한 전체 클래스 명 입력
+  - 순서와 타입이 일치하는 생성자 필요
+
+## 페이징 API
+
+- JPA는 페이징을 다음 두 API로 추상화
+- **setFirstResult**(int startPosition) : 조회 시작 위치(0부터 시작)
+- **setMaxResults**(int maxResult) : 조회할 데이터 수
+
+**페이징 API 예시**
+
+---
+
+```java
+//페이징 쿼리
+List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+        .setFirstResult(10)
+        .setMaxResults(20)
+        .getResultList();
+```
+
+*JpaMain*
+
+```java
+//1
+for (int i = 0; i < 100; i++) {
+    Member member = new Member();
+    member.setUsername("member" + i);
+    member.setAge(i);
+    em.persist(member);
+}
+
+em.flush();
+em.clear();
+
+//2
+List<Member> result = em.createQuery("select m from Member m order by m.age desc", Member.class)
+        .setFirstResult(1)
+        .setMaxResults(10)
+        .getResultList();
+
+System.out.println("result = " + result.size());
+for (Member member1 : result) {
+    System.out.println("member = " + member1);
+}
+
+tx.commit();
+```
+
+1. member0 부터 member99까지 저장
+2. 페이징 적용 - 나이가 많은 순으로 두 번째 인자부터 10개의 데이터 조회
+
+*실행*
+
+![](img2/img_48.png)
+
+- 해당 쿼리는 `persistence.xml`파일에서
+  `<property name="hibernate.dialect" value="org.hibernate.dialect.H2Dialect"/>`
+  으로 h2 DB로 설정해놔서 DB 방언에 맞게 쿼리가 작성된다.
+
+**페이징 API - MySQL 방언**
+
+---
+
+![](img2/img_49.png)
+
+**페이징 API - Oracle 방언**
+
+---
+
+![](img2/img_50.png)
