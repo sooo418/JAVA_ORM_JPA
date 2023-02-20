@@ -4839,3 +4839,373 @@ tx.commit();
 ---
 
 ![](img2/img_50.png)
+
+## 조인
+
+- 내부 조인:
+
+    ```sql
+    SELECT m FROM Member m [INNER] JOIN m.team t
+    ```
+
+- 외부 조인:
+
+    ```sql
+    SELECT m FROM Member m LEFT [OUTER] JOIN m.team t
+    ```
+
+- 세타 조인:
+
+    ```sql
+    select count(m) from Member m, Team t where m.username = t.name
+    ```
+
+  - 동등 조인이면서 SQL에서 JOIN문 을 사용하지 않는 조인 방식이다
+
+    ```java
+    Team team = new Team();
+    team.setName("teamA");
+    em.persist(team);
+    
+    Member member = new Member();
+    member.setUsername("teamA");
+    member.setAge(10);
+    member.changeTeam(team);
+    
+    em.persist(member);
+    
+    em.flush();
+    em.clear();
+    
+    String query = "select m from Member m, Team t where m.username = t.name";
+    List<Member> result = em.createQuery(query, Member.class)
+            .getResultList();
+    
+    System.out.println("result = " + result.size());
+    
+    tx.commit();
+    ```
+
+  ![](img2/img_51.png)
+
+  - cross join(교차 조인)이 일어난다.
+
+### **조인 - ON 절**
+
+---
+
+- ON절을 활용한 조인(JPA 2.1부터 지원)
+  1. 조인 대상 필터링
+  2. 연관관계 없는 엔티티 외부 조인(하이버네이트 5.1부터)
+
+**1. 조인 대상 필터링**
+
+---
+
+- 예) 회원과 팀을 조인하면서, 팀 이름이 A인 팀만 조인
+
+*JPQL:*
+
+```java
+SELECT m, t FROM Member m LEFT JOIN m.team t **on** t.name = 'A'
+```
+
+*SQL:*
+
+```sql
+SELECT m.*, t.* FROM
+Member m LEFT JOIN Team t **ON** m.TEAM_ID = t.id and t.name = 'A'
+```
+
+**2. 연관관계 없는 엔티티 외부 조인**
+
+---
+
+- 예) 회원의 이름과 팀의 이름이 같은 대상 외부 조인
+
+*JPQL:*
+
+```sql
+SELECT m, t FROM
+Member m LEFT JOIN Team t **on** m.username = t.name
+```
+
+*SQL:*
+
+```sql
+SELECT m.*, t.* FROM
+Member m LEFT JOIN Team t ON m.username = t.name
+```
+
+## 서브 쿼리
+
+- 나이가 평균보다 많은 회원
+
+    ```sql
+    select m from Member m
+    where m.age > **(select avg(m2.age) from Member m2)**
+    ```
+
+  - 메인 쿼리와 서브 쿼리가 관련이 없음 **(잘 짜여져 있음)**
+- 한 건이라도 주문한 고객
+
+    ```sql
+    select m from Member m
+    where **(select count(o) from Order o where m = o.member)** > 0
+    ```
+
+  - 서브 쿼리에서 메인 쿼리의 m 을 가져다가 사용함
+
+    → 메인 쿼리와 서브 쿼리가 관련이 있음 **(성능이 떨어짐)**
+
+
+### 서브 쿼리 지원 함수
+
+- [NOT] EXISTS (subquery): 서브 쿼리에 결과가 존재하면 참
+  - {ALL | ANY | SOME} (subquery)
+  - ALL: 모두 만족하면 참
+  - ANY, SOME: 같은 의미, 조건을 하나라도 만족하면 참
+- [NOT] IN (subquery): 서브 쿼리의 결과 중 하나라도 같은 것이 있으면 참
+
+**서브 쿼리 - 예제**
+
+---
+
+- 팀A 소속인 회원
+
+    ```sql
+    select m from Member m
+    where **exists** (select t from m.team t where t.name = ‘팀A’)
+    ```
+
+- 전체 상품 각각의 재고보다 주문량이 많은 주문들
+
+    ```sql
+    select o from Order o
+    where o.orderAmount > **ALL** (select p.stockAmount from Product p)
+    ```
+
+- 어떤 팀이든 팀에 소속된 회원
+
+    ```sql
+    select m from Member m
+    where m.team = **ANY** (select t from Team t)
+    ```
+
+
+### JPA 서브 쿼리 한계
+
+- JPA는 WHERE, HAVING 절에서만 서브 쿼리 사용 가능
+- SELECT 절도 가능(하이버네이트에서 지원)
+- **FROM 절의 서브 쿼리는 현재 JPQL에서 불가능**
+  - **조인으로 풀 수 있으면 풀어서 해결**
+
+## JPQL 타입 표현
+
+- 문자: ‘HELLO’, ‘SHE”s’
+- 숫자: 10L(Long), 10D(Double), 10F(Float)
+- Boolean: TRUE, FALSE
+  - ENUM: jpabook.MemberType.Admin (패키지명 포함)
+
+      ```java
+      Team team = new Team();
+      team.setName("teamA");
+      em.persist(team);
+    
+      Member member = new Member();
+      member.setUsername("teamA");
+      member.setAge(10);
+      member.setType(MemberType.ADMIN);
+    
+      member.changeTeam(team);
+    
+      em.persist(member);
+    
+      em.flush();
+      em.clear();
+    
+      String query = "select m.username, 'HELLO', TRUE from Member m" +
+              " where m.type = jpql.MemberType.ADMIN";
+      List<Object[]> result = em.createQuery(query)
+              .getResultList();
+    
+      /* 위의 코드는 설명을 위해서 사용한거고, 이런식으로 사용하는게 좋음
+      String query = "select m.username, 'HELLO', TRUE from Member m" +
+                          " where m.type = :userType";
+      List<Object[]> result = em.createQuery(query)
+              .setParameter("userType", MemberType.ADMIN)
+              .getResultList();
+      */
+    
+      for (Object[] objects : result) {
+          System.out.println("objects = " + objects[0]);
+          System.out.println("objects = " + objects[1]);
+          System.out.println("objects = " + objects[2]);
+      }
+    
+      tx.commit();
+      ```
+
+    ![](img2/img_52.png)
+
+- 엔티티 타입: TYPE(m) = Member (상속 관계에서 사용)
+
+**JPQL 기타**
+
+---
+
+- SQL과 문법이 같은 식
+- EXISTS, IN
+- AND, OR, NOT
+- =, >, ≥, <, ≤, <>
+- BETWEEN, LIKE, **IS NULL**
+
+## 조건식 - CASE 식
+
+- *기본 CASE 식*
+
+    ```sql
+    select
+        case
+            when m.age <= 10 then '학생요금'
+            when m.age >= 60 then '경로요금'
+            else '일반요금'
+        end
+    from Member m
+    ```
+
+  - 기본 CASE 식에서는 ≤, ≥ 같은 조건을 사용할 수 있다.
+
+  *JpqMain*
+
+    ```java
+    Team team = new Team();
+    team.setName("teamA");
+    em.persist(team);
+    
+    Member member = new Member();
+    member.setUsername("teamA");
+    member.setAge(10);
+    member.setType(MemberType.ADMIN);
+    
+    member.changeTeam(team);
+    
+    em.persist(member);
+    
+    em.flush();
+    em.clear();
+    
+    String query =
+            "select " +
+            "case   when m.age <= 10 then '학생요금'" +
+            "       when m.age >= 60 then '경로요금'" +
+            "       else '일반요금'" +
+            "end " +
+            "from Member m";
+    List<String> result = em.createQuery(query, String.class)
+            .getResultList();
+    
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+    
+    tx.commit();
+    ```
+
+  ![](img2/img_53.png)
+
+
+- *단순 CASE 식*
+
+    ```sql
+    select
+        case t.name
+            when '팀A' then '인센티브110%'
+            when '팀B' then '인센티브120%'
+            else '인센티브105%'
+        end
+    from Team t
+    ```
+
+  - 단순 CASE 식에서는 ‘정확하게 대비된 값과 일치할 때만 이거 해라’ 식으로 작성하여야 한다.
+
+- COALESCE: 하나씩 조회해서 null이 아니면 반환
+
+  *사용자 이름이 없으면 이름 없는 회원을 반환*
+
+    ```sql
+    select coalesce(m.username, '이름 없는 회원') from Member m
+    ```
+
+  *JpaMain*
+
+    ```java
+    Team team = new Team();
+    team.setName("teamA");
+    em.persist(team);
+    
+    Member member = new Member();
+    member.setUsername(null);
+    member.setAge(10);
+    member.setType(MemberType.ADMIN);
+    
+    member.changeTeam(team);
+    
+    em.persist(member);
+    
+    em.flush();
+    em.clear();
+    
+    String query = "select coalesce(m.username, '이름 없는 회원') from Member m";
+    
+    List<String> result = em.createQuery(query, String.class)
+            .getResultList();
+    
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+    
+    tx.commit();
+    ```
+
+  ![](img2/img_54.png)
+
+- NULLIF: 두 값이 같으면 null 반환, 다르면 첫번째 값 반환
+  *사용자 이름이 ‘관리자’면 null을 반환하고 나머지는 본인의 이름을 반환*
+
+    ```sql
+    select NULLIF(m.username, '관리자') from Member m
+    ```
+
+  *JpaMain*
+
+    ```java
+    Team team = new Team();
+    team.setName("teamA");
+    em.persist(team);
+    
+    Member member = new Member();
+    member.setUsername("관리자");
+    member.setAge(10);
+    member.setType(MemberType.ADMIN);
+    
+    member.changeTeam(team);
+    
+    em.persist(member);
+    
+    em.flush();
+    em.clear();
+    
+    String query = "select nullif(m.username, '관리자') from Member m";
+    
+    List<String> result = em.createQuery(query, String.class)
+            .getResultList();
+    
+    for (String s : result) {
+        System.out.println("s = " + s);
+    }
+    
+    tx.commit();
+    ```
+
+  ![](img2/img_55.png)
