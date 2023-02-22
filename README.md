@@ -5209,3 +5209,243 @@ Member m LEFT JOIN Team t ON m.username = t.name
     ```
 
   ![](img2/img_55.png)
+
+## JPQL 기본 함수
+
+- CONCAT
+  - 하이버네이트에선 `||` 로 가능
+- SUBSTRING
+- TRIM
+- LOWER, UPPER
+- LENGTH
+- LOCATE
+  - `select locate('de', 'abcdefg') from Test t`
+    abcdefg문자열에서 de의 위치를 조회 = 4
+- ABS, SQRT, MOD
+- SIZE, INDEX(JPA 용도)
+
+### 사용자 정의 함수 호출
+
+- 하이버네이트는 사용전 방언에 추가해야 한다.
+  - 사용하는 DB 방언을 상속받고, 사용자 정의 함수를 등록한다.
+
+    ```sql
+    select function('group_concat', i.name) from Item i
+    ```
+
+
+*MyH2Dialect*
+
+```java
+package dialect;
+
+import org.hibernate.dialect.H2Dialect;
+import org.hibernate.dialect.function.StandardSQLFunction;
+import org.hibernate.type.StandardBasicTypes;
+
+public class MyH2Dialect extends H2Dialect {
+    public MyH2Dialect() {
+        registerFunction("group_concat", new StandardSQLFunction("group_concat", StandardBasicTypes.STRING));
+    }
+}
+```
+
+- `H2Diaclet`를 상속받아서 `MyH2Dialect`생성
+
+*persistence.xml*
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.2"
+             xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_2.xsd">
+    <persistence-unit name="hello">
+        <properties>
+            <!-- 필수 속성 -->
+            <property name="javax.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="javax.persistence.jdbc.user" value="sa"/>
+            <property name="javax.persistence.jdbc.password" value=""/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:tcp://localhost/~/test"/>
+
+						**<!-- 하이버네이트 방언을 생성한 MyH2Dialect를 세팅 -->**
+            <property name="hibernate.dialect" value="dialect.MyH2Dialect"/>
+
+            <!-- 옵션 -->
+            <property name="hibernate.show_sql" value="true"/>
+            <property name="hibernate.format_sql" value="true"/>
+            <property name="hibernate.use_sql_comments" value="true"/>
+            <property name="hibernate.jdbc.batch_size" value="10"/>
+            <property name="hibernate.hbm2ddl.auto" value="create"/>
+        </properties>
+    </persistence-unit>
+</persistence>
+```
+
+- 생성한 `MyH2Dialect` 세팅
+
+*JpqMain*
+
+```java
+Member member1 = new Member();
+member1.setUsername("관리자1");
+em.persist(member1);
+
+Member member2 = new Member();
+member2.setUsername("관리자2");
+em.persist(member2);
+
+em.flush();
+em.clear();
+
+/*
+	String query = "select group_concat(m.username) from Member m";
+	으로도 사용가능하다.
+	대신 언어 또는 참조 삽인을 제거하던가 하이버네이트로 세팅해야 구문오류가 안난다.
+*/
+String query = "select function('group_concat', m.username) from Member m";
+
+List<String> result = em.createQuery(query, String.class)
+        .getResultList();
+
+for (String s : result) {
+    System.out.println("s = " + s);
+}
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_56.png)
+
+- `group_concat`은 row의 특정 컬럼값을 `,`를 구분으로 한줄로 연결해주는 함수다.
+
+## JPQL - 경로 표현식
+
+- `.`(점)을 찍어 객체 그래프를 탐색하는 것
+
+```sql
+select m.username -> 상태 필드
+    from Member m
+        join m.team t -> 단일 값 연관 필드
+        join m.orders o -> 컬렉션 값 연관 필드
+where t.name = '팀A'
+```
+
+- 상태 필드, 단일 값 연관 필드, 컬렉션 값 연관 필드 이렇게 세 가지 경로 표현식이 있는데
+  경로 표현식에 따라서 동작하는 방식과 결과가 달라지므로 구분해서 이해 해야한다.
+
+### 경로 표현식 용어 정리
+
+- 상태 필드(state field): 단순히 값을 저장하기 위한 필드
+- 연관필드(association field): 연관관계를 위한 필드
+  - 단일 값 연관 필드:
+    `@ManyToOne`, `@OneToOne`, 대상이 엔티티
+  - 컬렉션 값 연관 필드:
+    `@OneToMany`, `@ManyToMany`, 대상이 컬렉션
+
+### 경로 표현식 특징
+
+- 상태 필드(state filed): 경로 탐색의 끝, 탐색X
+- 단일 값 연관 경로: 묵시적 내부 조인(inner join) 발생, 탐색O
+- 컬렉션 값 연관 경로: 묵시적 내부 조인 발생, 탐색X
+  - FROM 절에서 명시적 조인을 통해 별칭을 얻으면 별칭을 통해 탐색 가능
+
+    ```java
+    String query = "select m.username from Team t join t.members m";
+    ```
+
+
+> 참고:
+JPQL 작성시 묵시적 조인을 사용하지 말고 명시적 조인을 사용해서 쿼리를 튜닝하는데도 좋고 조인을 하는 쿼리인지 명확하게 알 수 있다. → 묵시적 X
+>
+
+### 상태 필드 경로 탐색
+
+- JPQL
+
+    ```sql
+    select m.username, m.age from Member m
+    ```
+
+- SQL
+
+    ```sql
+    select m.username, m.age from Member m
+    ```
+
+
+### 단일 값 연관 경로 탐색
+
+- JPQL
+
+    ```sql
+    select o.member from Order o
+    ```
+
+- SQL
+
+    ```sql
+    select m.*
+    from Orders o
+    inner join Member m on o.member_id = m.id
+    ```
+
+
+### 명식적 조인, 묵시적 조인
+
+- 명시적 조인: join 키워드 직접 사용
+
+    ```sql
+    select m from Member m join m.team t
+    ```
+
+- 묵시적 조인: 경로 표현식에 의해 묵시적으로 SQL 조인 발생(내부 조인만 가능)
+
+    ```sql
+    select m.team from Member m
+    ```
+
+
+**경로 표현식 - 예제**
+
+---
+
+```sql
+select o.member.team from Order o
+```
+
+- 성공
+
+```sql
+select t.members from Team t
+```
+
+- 성공
+
+```sql
+select t.members.username from Team t
+```
+
+- 실패
+  컬렉션 값 연관 경로에선 명시적 조인으로 별칭을 얻어야만 탐색이 가능
+
+```sql
+select m.username from Team t join t.members m
+```
+
+- 성공
+
+**경로 탐색을 사용한 묵시적 조인 시 주의사항**
+
+---
+
+- 항상 내부 조인
+- 컬렉션은 경로 탐색의 끝, 명시적 조인을 통해 별칭을 얻어야함
+- 경로 탐색은 주로  SELECT, WHERE 절에서 사용하지만 묵시적 조인으로 인해 SQL의 FROM (JOIN)절에 영향을 줌
+
+### 실무 조언
+
+- **가급적 묵시적 조인 대신에 명시적 조인 사용**
+- 조인은 SQL 튜닝에 중요 포인트
+- 묵시적 조인은 조인이 일어나는 상황을 한눈에 파악하기 어려움
