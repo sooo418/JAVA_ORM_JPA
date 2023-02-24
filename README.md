@@ -2525,8 +2525,6 @@ public void addMember(Member member) {
 >4. batch fetch size를 사용한다.
 >
 
-# 리뷰 완료
-
 ## 다대다[N:M]
 
 **다대다(관계형 데이터베이스)**
