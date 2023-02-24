@@ -5449,3 +5449,322 @@ select m.username from Team t join t.members m
 - **가급적 묵시적 조인 대신에 명시적 조인 사용**
 - 조인은 SQL 튜닝에 중요 포인트
 - 묵시적 조인은 조인이 일어나는 상황을 한눈에 파악하기 어려움
+
+## JPQL - 페치 조인(fetch join)
+
+- SQL 조인 종류X
+- JPQL에서 **성능 최적화**를 위해 제공하는 기능
+- 연관된 엔티티나 컬렉션을  **SQL 한 번에 함께 조회**하는 기능
+- join fetch 명령어 사용
+- 페치 조인 ::= [ LEFT [OUTER] | INNER ] JOIN FETCH 조인경로
+
+### 엔티티 페치 조인
+
+- 회원을 조회하면서 연관된 팀도 함께 조회(SQL 한 번에)
+- SQL을 보면 회원 뿐만 아니라 **팀(T.*)**도 함께 **SELECT**
+- **[JPQL]**
+
+    ```sql
+    select m from Member m **join fetch** m.team
+    ```
+
+- **[SQL]**
+
+    ```sql
+    SELECT M.*, T.* FROM MEMBER M
+    **INNER JOIN TEAM T** ON M.TEAM_ID = T.ID
+    ```
+
+
+![](img2/img_57.png)
+
+**fetch join을 사용하지 않을 경우**
+
+---
+
+*JpqMain*
+
+```java
+String query = "select m From Member m";
+
+List<Member> result = em.createQuery(query, Member.class)
+        .getResultList();
+
+for (Member member : result) {
+    System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
+    //회원1, 팀A(SQL)
+    //회원2, 팀A(1차캐시)
+    //회원3, 팀B(SQL)
+}
+
+tx.commit();
+```
+
+- 회원4 와 팀C는 생략
+- `Member`와 `Team`의 연관관계에서 `FetchType`은 LAZY로 세팅되어있음.
+- `**select m From Member m**`
+
+*실행*
+
+![](img2/img_58.png)
+
+- SELECT SQL이 세 번 실행되는걸 확인할 수 있다.
+  1. 회원 조회
+  2. 팀A 조회
+  3. 팀B 조회
+- 즉 최악의 경우 N + 1번의 SQL이 실행될 수 있다.
+
+**fetch join을 사용한 경우**
+
+---
+
+*JpaMain*
+
+```java
+String query = "select m From Member m join fetch m.team";
+
+List<Member> result = em.createQuery(query, Member.class)
+        .getResultList();
+
+for (Member member : result) {
+    System.out.println("member = " + member.getUsername() + ", " + member.getTeam().getName());
+}
+
+tx.commit();
+```
+
+- **`select m From Member m join fetch m.team`**
+
+*실행*
+
+![](img2/img_59.png)
+
+- SELECT SQL 한 번만으로 조회가 완료된다.
+
+### 컬렉션 페치 조인
+
+- 일대다 관계, 컬렉션 페치 조인
+- **[JPQL]**
+
+    ```sql
+    select t
+    from Team t **join fetch t.members**
+    where t.name = ‘팀A’
+    ```
+
+- **[SQL]**
+
+    ```sql
+    SELECT T.*, M.*
+    FROM TEAM T
+    INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+    WHERE T.NAME = ‘팀A’
+    ```
+
+
+![](img2/img_60.png)
+
+- `Team` 입장에선 `Member`와 JOIN을 하게되면 위의 그림에서 표와 같이 `팀A`에 대해 `회원1,2`를 표시해주어야 하기 때문에 `팀A`의 ROW 수가 2개가 된다.
+- `팀A`의 엔티티는 영속성 컨텍스트에 하나만 올라가기 때문에 행이 2개여도 같은 주소의 `팀A` 엔티티를 갖게 된다.
+- JPA 입장에선 데이터의 개수를 줄여야할지 말아야할지는 사용자한테 결정을 맡기고,
+  DB에서 조회해서 결과가 나온 수만큼 반환하도록 되어있다.
+
+*JpaMain*
+
+```java
+String query = "select t From Team t join fetch t.members";
+
+List<Team> result = em.createQuery(query, Team.class)
+        .getResultList();
+
+for (Team team : result) {
+    System.out.println("team = " + team.getName() + "|members=" + team.getMembers().size());
+    for( Member member : team.getMembers() ) {
+        System.out.println("-> member = " + member);
+    }
+}
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_61.png)
+
+**페치 조인과 DISTINCT**
+
+---
+
+- SQL의 DISTINCT는 중복된 결과를 제거하는 명령
+- JPQL의 DISTINCT 2가지 기능 제공
+  1. SQL에 DISTINCT를 추가
+  2. 애플리케이션에서 엔티티 중복 제거
+
+```sql
+select **distinct** t
+from Team t fetch t.members
+where t.name = ‘팀A’
+```
+
+- SQL에 DISTINCT를 추가하지만 데이터가 다르므로 SQL 결과에서 중복제거 실패
+
+![](img2/img_62.png)
+
+- DISTINCT가 추가로 애플리케이션에서 중복 제거시도
+- 같은 식별자를 가진 **Team 엔티티 제거**
+
+![](img2/img_63.png)
+
+*JpaMain*
+
+```java
+String query = "select distinct t From Team t join fetch t.members";
+
+List<Team> result = em.createQuery(query, Team.class)
+        .getResultList();
+
+for (Team team : result) {
+    System.out.println("team = " + team.getName() + "|members=" + team.getMembers().size());
+    for( Member member : team.getMembers() ) {
+        System.out.println("-> member = " + member);
+    }
+}
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_64.png)
+
+### 페치 조인과 일반 조인의 차이
+
+- 일반 조인 실행시 연관된 엔티티를 함께 조회하지 않음
+- **[JPQL]**
+
+    ```sql
+    select t
+    from Team t join t.members m
+    where t.name = '팀A'
+    ```
+
+- **[SQL]**
+
+    ```sql
+    SELECT T.*
+    FROM TEAM T
+    INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+    WHERE T.NAME = '팀A'
+    ```
+
+- JPQL은 결과를 반환할 때 연관관계 고려X
+- 단지 SELECT 절에 지정한 엔티티만 조회할 뿐
+- 여기서는 팀 엔티티만 조회하고, 회원 엔티티는 조회X
+- 페치 조인을 사용할 때만 연관된 엔티티도 함께 **조회(즉시 로딩)**
+- **페치 조인은 객체 그래프를 SQL 한번에 조회하는 개념**
+
+**페치 조인 실행 예시**
+
+---
+
+- 페치 조인은 연관된 엔티티를 함께 조회함
+- **[JPQL]**
+
+    ```sql
+    select t
+    from Team t join fetch t.members
+    where t.name = '팀A'
+    ```
+
+- **[SQL]**
+
+    ```sql
+    SELECT T.*, M.*
+    FROM TEAM T
+    INNER JOIN MEMBER M ON T.ID = M.TEAM_ID
+    WHERE T.NAME = '팀A'
+    ```
+
+
+### 페치 조인의 특징과 한계
+
+- **페치 조인 대상에는 별칭을 줄 수 없다.**
+  - 하이버네이트는 가능, 가급적 사용X
+  - **별칭을 잘못 사용하면 연관된 데이터 수가 달라져서 데이터 무결성이 깨질 수 있으므로 조심해서 사용해야 한다.**
+  - **특히 2차 캐시와 함께 사용할 때 조심해야 하는데, 연관된 데이터 수가 달라진 상태에서 2차 캐시에 저장되면 다른 곳에서 조회할 때도 연관된 데이터 수가 달라지는 문제가 발생할 수 있다.**
+- **둘 이상의 컬렉션은 페치 조인 할 수 없다.**
+  - **구현체에 따라 되기도 하는데 컬렉션 * 컬렉션의 카테시안 곱이 만들어지므로 주의해야한다.**
+- **컬렉션을 페치 조인하면 페이징 API(setFirstResult, setMaxResults)를 사용할 수 없다.**
+  - 일대일, 다대일 같은 단일 값 연관 필드들은 페치 조인해도 페이징 가능
+  - 하이버네이트는 경고 로그를 남기고 메모리에서 페이징(매우 위험)
+- 연관된 엔티티들을 SQL 한 번으로 조회 - 성능 최적화
+- 엔티티에 직접 적용하는 글로벌 로딩 전략보다 우선함
+  - `@OneToMany(fetch = FetchType.LAZY) //글로벌 로딩 전략`
+- 실무에서 글로벌 로딩 전략은 모두 지연 로딩
+- 최적화가 필요한 곳은 페치 조인 적용
+
+**batch fetch size를 사용한 페이징**
+
+---
+
+*Team*
+
+```java
+@Entity
+public class Team {
+
+    @Id @GeneratedValue
+    private Long id;
+
+    private String name;
+
+		@BatchSize(size = 100)
+    @OneToMany(mappedBy = "team")
+    private List<Member> members = new ArrayList<>();
+
+    //Getter, Setter...
+}
+```
+
+- `@BatchSize(size = 100)`으로 사용하거나
+
+*persistence.xml*
+
+```java
+<property name="hibernate.default_batch_fetch_size" value="100"/>
+```
+
+- 해당 옵션으로 글로벌로 사용할 수 있다.
+
+*JpaMain*
+
+```java
+String query = "select t From Team t";
+
+List<Team> result = em.createQuery(query, Team.class)
+        .setFirstResult(0)
+        .setMaxResults(2)
+        .getResultList();
+
+System.out.println("result = " + result.size());
+
+for (Team team : result) {
+    System.out.println("team = " + team.getName() + "|members=" + team.getMembers().size());
+    for( Member member : team.getMembers() ) {
+        System.out.println("-> member = " + member);
+    }
+}
+```
+
+*실행*
+
+![](img2/img_65.png)
+
+- 먼저 `Team`을 페이징 처리해서 조회한다.
+- 그리고 `Member` 엔티티를 지연로딩으로 `batch fetch size`의 size 만큼 WHERE절의 IN 조건에 조회된 `Team`을 파라미터로 세팅해서 조회한다.
+
+### 페치 조인 - 정리
+
+- 모든 것을 페치 조인으로 해결할 수 는 없음
+- 페치 조인은 객체 그래프를 유지할 때 사용하면 효과적
+- 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면, 페치 조인 보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적
