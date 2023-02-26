@@ -5766,3 +5766,331 @@ for (Team team : result) {
 - 모든 것을 페치 조인으로 해결할 수 는 없음
 - 페치 조인은 객체 그래프를 유지할 때 사용하면 효과적
 - 여러 테이블을 조인해서 엔티티가 가진 모양이 아닌 전혀 다른 결과를 내야 하면, 페치 조인 보다는 일반 조인을 사용하고 필요한 데이터들만 조회해서 DTO로 반환하는 것이 효과적
+
+## JPQL - 다형성 쿼리
+
+![](img2/img_66.png)
+
+- 위의 그림과 같이 다형적으로 테이블을 설계했을 때 JPA가 특수한 기능을 제공해준다.
+
+**TYPE**
+
+---
+
+- 조회 대상을 특정 자식으로 한정
+- 예) `Item` 중에 `Book`, `Movie`를 조회해라
+- **[JPQL]**
+
+    ```sql
+    select  i from Item i
+    where type(i) IN (Book, Movie)
+    ```
+
+- **[SQL]**
+
+    ```sql
+    <!-- 싱글 테이블 전략 -->
+    select i from i
+    where i.DTYPE in ('B', 'M')
+    ```
+
+
+**TREAT(JPA2.1)**
+
+---
+
+- 자바의 타입 캐스팅과 유사
+- 상속 구조에서 부모 타입을 특정 자식 타입으로 다룰 때 사용
+- FROM, WHERE, SELECT(하이버네이트 지원) 사용
+- 예) 부모인 `Item`과 자식 `Book`이 있다.
+- **[JPQL]**
+
+    ```sql
+    select i from Item i
+    where treat(i as Book).auther = 'kim'
+    ```
+
+- **[SQL]**
+
+    ```sql
+    <!-- 싱글 테이블 전략 -->
+    select i.* from Item i
+    where i.DTYPE = 'B' and i.auther = 'kim'
+    ```
+
+
+## JPQL - 엔티티 직접 사용
+
+### 엔티티 직접 사용 - 기본 키 값
+
+- JPQL에서 엔티티를 직접 사용하면 SQL에서 해당 엔티티의 기본 키 값을 사용
+- **[JPQL]**
+
+    ```sql
+    select count(m.id) from Member m <!-- 엔티티의 아이드를 사용 -->
+    select count(m) from Member m <!-- 엔티티를 직접 사용 -->
+    ```
+
+- **[SQL] (JPQL 둘 다 같은 다음 SQL 실행)**
+
+    ```sql
+    select count(m.id) as cnt from Member m
+    ```
+
+
+### 엔티티 직접 사용 - 외래 키 값
+
+*JpaMain*
+
+```java
+String query = "select m from Member m where m.team = :team";
+
+List<Member> members = em.createQuery(query, Member.class)
+        .setParameter("team", teamA)
+        .getResultList();
+
+for (Member member : members) {
+    System.out.println("member = " + member);
+}
+```
+
+*실행*
+
+![](img2/img_67.png)
+
+## JPQL - Named 쿼리
+
+### Named 쿼리 - 어노테이션
+
+```java
+@Entity
+@NamedQuery(
+        name = "Member.findByUsername", 
+        query = "select m from Member m where m.username = :username")
+public class Member {
+    ...
+}
+```
+
+```java
+List<Member> resultList =
+        em.createNamedQuery("Member.findByUsername", Member.class)
+                .setParameter("username", "회원1")
+                .getResultList();
+```
+
+- 엔티티에다 `@NamedQuery(...)` 로 미리 선언을 해놓고 `name`값으로 쿼리를 가져와 재활용 할 수 있다.
+
+### Named 쿼리 - 정적 쿼리
+
+- 미리 정의해서 이름을 부여해두고 사용하는 JPQL
+- 정적 쿼리
+- 어노테이션, XML에 정의
+- 애플리케이션 로딩 시점에 초기화 후 재사용
+- **애플리케이션 로딩 시점에 쿼리를 검증**
+
+*Member*
+
+```java
+@Entity
+@NamedQuery(
+        name = "Member.findByUsername",
+        query = "select m from Member m where m.username = :username"
+)
+public class Member {
+
+    @Id @GeneratedValue
+    private Long id;
+    private String username;
+    private int age;
+
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "TEAM_ID")
+    private Team team;
+
+    @Enumerated(EnumType.STRING)
+    private MemberType type;
+
+    public void changeTeam(Team team) {
+        this.team = team;
+        team.getMembers().add(this);
+    }
+
+    //Getter, Setter...
+}
+```
+
+- `@NamedQuery(
+  name = "Member.findByUsername",
+  query = "select m from Member m where m.username = :username)` 추가
+
+*JpaMain*
+
+```java
+List<Member> resultList = em.createNamedQuery("Member.findByUsername", Member.class)
+        .setParameter("username", "회원1")
+        .getResultList();
+
+for (Member member : resultList) {
+    System.out.println("member = " + member);
+}
+```
+
+- 위 코드와 같이 `name`값으로 NamedQuery 호출하여 사용
+
+*실행*
+
+![](img2/img_68.png)
+
+### Named 쿼리 환경에 따른 설정
+
+- XML이 항상 우선권을 가진다.
+- 애플리케이션 운영 환경에 따라 다른 XML을 배포할 수 있다.
+
+**참고**
+
+---
+
+*UserRepository*
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+        @Query("select u from User u where u.emailAddress = ?1")
+        User findByEmailAddress(String emailAddress);
+}
+```
+
+- Spring Data JPA에서 추상 메소드 위에 `@Query(...)`를 사용하여 정적 쿼리를 작성하는데 이게 Named 쿼리다. (이름 없는 Named 쿼리라고도 한다.)
+
+## JPQL - 벌크 연산
+
+- 벌크 연산이란 *데이터의 PK를 찍어서 Update 하거나 Delete 하는걸 제외한 모든 Update나 Delete 연산이라고 보면 된다.*
+
+**재고가 10개 미만인 모든 상품의 가격을 10% 상승하려면?**
+
+---
+
+- JPA 변경 감지 기능으로 실행하려면 너무 많은 SQL 실행
+  1. 재고가 10개 미만인 상품을 리스트로 조회한다.
+  2. 상품 엔티티의 가격을 10% 증가한다.
+  3. 트랜잭션 커밋 시점에 변경 감지가 동작한다.
+- 변경된 데이터가 100건이라면 100번의 UPDATE SQL 실행
+
+**벌크 연산 예제**
+
+---
+
+- 쿼리 한 번으로 여러 테이블 로우 변경(엔티티)
+- **executeUpdate()의 결과는 영향받은 엔티티 수 반환**
+- **UPDATE, DELETE 지원**
+- **INSERT(insert into .. select, 하이버네이트 지원)**
+
+*JpqMain*
+
+```java
+int resultCount = em.createQuery("update Member m set m.age = 20")
+        .executeUpdate();
+
+System.out.println("resultCount = " + resultCount);
+```
+
+*실행*
+
+![](img2/img_69.png)
+
+### 벌크 연산 주의
+
+- 벌크 연산은 영속성 컨텍스트를 무시하고 데이터베이스에 직접 쿼리
+  - 벌크 연산을 먼저 실행 (영속성 컨텍스트에 데이터가 쌓이기 전에)
+  - **벌크 연산 수행 후 영속성 컨텍스트 초기화**
+    - 벌크 연산도 jpql이기 때문에 수행 전에 flush가 호출된다.
+
+*JpaMain*
+
+```java
+Member member1 = new Member();
+member1.setUsername("회원1");
+member1.setAge(0);
+em.persist(member1);
+
+Member member2 = new Member();
+member2.setUsername("회원2");
+member2.setAge(0);
+em.persist(member2);
+
+Member member3 = new Member();
+member3.setUsername("회원3");
+member3.setAge(0);
+em.persist(member3);
+
+//FLUSH
+int resultCount = em.createQuery("update Member m set m.age = 20")
+        .executeUpdate();
+
+System.out.println("resultCount = " + resultCount);
+
+System.out.println("member1.getAge() = " + member1.getAge());
+System.out.println("member2.getAge() = " + member2.getAge());
+System.out.println("member3.getAge() = " + member3.getAge());
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_70.png)
+
+- 벌크 연산 Update SQL이 실행되기 전에 flush가 호출되서 INSERT SQL이 세 번 호출되는게 확인이 된다.
+- 벌크 연산후에 영속성 컨텍스트에 저장된 회원1,2,3의 age 값은 0이기 때문에 데이터 정합성에 어긋나게 된다.
+- 즉, 영속성 컨텍스트를 초기화하고 `Member` 엔티티를 다시 조회해야 한다.
+
+*JpaMain*
+
+```java
+Member member1 = new Member();
+member1.setUsername("회원1");
+member1.setAge(0);
+em.persist(member1);
+
+Member member2 = new Member();
+member2.setUsername("회원2");
+member2.setAge(0);
+em.persist(member2);
+
+Member member3 = new Member();
+member3.setUsername("회원3");
+member3.setAge(0);
+em.persist(member3);
+
+//FLUSH
+int resultCount = em.createQuery("update Member m set m.age = 20")
+        .executeUpdate();
+
+em.clear();
+
+Member findMember = em.find(Member.class, member1.getId());
+
+System.out.println("findMember.getAge() = " + findMember.getAge());
+
+tx.commit();
+```
+
+*실행*
+
+![](img2/img_71.png)
+
+**참고**
+
+---
+
+*UserRepository*
+
+```java
+public interface UserRepository extends JpaRepository<User, Long> {
+		@Modifying
+		@Query("update User u set u.firstname = ?1 where u.lastname = ?2")
+		int setFixedFirstnameFor(String firstname, String lastname);
+}
+```
+
+- 위와 같이 `@Modifying` 어노테이션을 사용시 해당 쿼리를 수행 후 자동으로 영속성 컨텍스트를 clear해주는 옵션을 제공해준다. (기본값이 true)
